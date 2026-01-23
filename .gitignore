@@ -22,3 +22,7 @@ dist/
 
 # wp-env
 .wp-env/
+
+# Local WordPress harness
+wp-harness/wordpress/
+wp-harness/runtime/
