@@ -166,6 +166,8 @@ class Mailmojo_Admin {
 			$this->set_connection_status( 'connected', __( 'Connection successful.', 'mailmojo' ) );
 			$this->redirect_with_notice( 'connection_success' );
 		} catch ( Throwable $error ) {
+			var_dump( $error );
+			exit;
 			$this->handle_connection_error( $error );
 		}
 	}
@@ -175,90 +177,47 @@ class Mailmojo_Admin {
 			throw new RuntimeException( __( 'Mailmojo SDK is not available.', 'mailmojo' ) );
 		}
 
-		if ( ! class_exists( 'GuzzleHttp\\Client' ) ) {
-			throw new RuntimeException( __( 'Mailmojo SDK dependencies are missing.', 'mailmojo' ) );
+		if ( ! class_exists( 'MailMojo\\Configuration' ) || ! class_exists( 'MailMojo\\Api\\ListApi' ) ) {
+			throw new RuntimeException( __( 'Mailmojo SDK is incomplete.', 'mailmojo' ) );
 		}
 
-		$config = MailMojo\Configuration::getDefaultConfiguration();
-		if ( method_exists( $config, 'setAccessToken' ) ) {
-			$config->setAccessToken( $token );
-		}
-		if ( method_exists( $config, 'setApiKey' ) ) {
-			$config->setApiKey( 'Authorization', $token );
-		}
-		if ( method_exists( $config, 'setApiKeyPrefix' ) ) {
-			$config->setApiKeyPrefix( 'Authorization', 'Bearer' );
-		}
-
-		$client    = new GuzzleHttp\Client();
-		$candidate = $this->resolve_api_candidate( $client, $config );
-
-		if ( ! $candidate ) {
-			throw new RuntimeException( __( 'Mailmojo SDK does not expose a supported connection test.', 'mailmojo' ) );
-		}
-
-		$instance = $candidate['instance'];
-		$method   = $candidate['method'];
-		$instance->$method();
+		$lists_api  = new MailMojo\Api\ListApi();
+		$lists_api->getConfig()->setHost( $this->get_mailmojo_api_host() );
+		$lists_api->getConfig()->setAccessToken( $token );
+		$lists_api->getLists();
 	}
 
-	private function resolve_api_candidate( GuzzleHttp\Client $client, MailMojo\Configuration $config ): ?array {
-		$candidates = array(
-			array(
-				'class'   => 'MailMojo\\Api\\AccountApi',
-				'methods' => array( 'getAccount', 'getAccountWithHttpInfo' ),
-			),
-			array(
-				'class'   => 'MailMojo\\Api\\AccountsApi',
-				'methods' => array( 'getAccount', 'getAccountWithHttpInfo' ),
-			),
-			array(
-				'class'   => 'MailMojo\\Api\\UsersApi',
-				'methods' => array( 'getCurrentUser', 'getMe', 'getUser' ),
-			),
-			array(
-				'class'   => 'MailMojo\\Api\\DefaultApi',
-				'methods' => array( 'ping', 'getPing' ),
-			),
-		);
+	private function get_mailmojo_api_host(): string {
+		$api_host = 'https://api.mailmojo.no/v1';
+		$is_local = false;
 
-		foreach ( $candidates as $candidate ) {
-			if ( ! class_exists( $candidate['class'] ) ) {
-				continue;
+		if ( function_exists( 'wp_get_environment_type' ) ) {
+			$environment = wp_get_environment_type();
+			$is_local    = in_array( $environment, array( 'local', 'development' ), true );
+		}
+
+		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( is_string( $site_host ) ) {
+			$site_host = strtolower( $site_host );
+			if ( in_array( $site_host, array( 'localhost', '127.0.0.1', '::1' ), true ) ) {
+				$is_local = true;
 			}
 
-			$instance = $this->instantiate_api( $candidate['class'], $client, $config );
-			if ( ! $instance ) {
-				continue;
-			}
-
-			foreach ( $candidate['methods'] as $method ) {
-				if ( method_exists( $instance, $method ) ) {
-					return array(
-						'instance' => $instance,
-						'method'   => $method,
-					);
-				}
+			if ( preg_match( '/\\.(local|test|localhost)$/', $site_host ) ) {
+				$is_local = true;
 			}
 		}
 
-		return null;
-	}
-
-	private function instantiate_api( string $class, GuzzleHttp\Client $client, MailMojo\Configuration $config ): ?object {
-		try {
-			return new $class( $client, $config );
-		} catch ( Throwable $error ) {
-			try {
-				return new $class( $client );
-			} catch ( Throwable $error ) {
-				try {
-					return new $class();
-				} catch ( Throwable $error ) {
-					return null;
-				}
-			}
+		if ( $is_local ) {
+			$api_host = 'https://api.mailmojo.local/v1';
 		}
+
+		/**
+		 * Filters the Mailmojo API host used by the plugin.
+		 *
+		 * @param string $api_host API host including version prefix (e.g. https://api.mailmojo.no/v1).
+		 */
+		return (string) apply_filters( 'mailmojo_api_host', $api_host );
 	}
 
 	private function handle_connection_error( Throwable $error ): void {
@@ -266,13 +225,13 @@ class Mailmojo_Admin {
 		$message = __( 'Unexpected error while testing connection.', 'mailmojo' );
 
 		if ( class_exists( 'MailMojo\\ApiException' ) && $error instanceof MailMojo\ApiException ) {
-			if ( 401 === $code || 403 === $code ) {
+			if ( 0 === $code ) {
+				$message = __( 'Network error. Please try again.', 'mailmojo' );
+			} elseif ( 401 === $code || 403 === $code ) {
 				$message = __( 'Unauthorized. Please check the token.', 'mailmojo' );
 			} else {
 				$message = __( 'Mailmojo API returned an error.', 'mailmojo' );
 			}
-		} elseif ( class_exists( 'GuzzleHttp\\Exception\\ConnectException' ) && $error instanceof GuzzleHttp\Exception\ConnectException ) {
-			$message = __( 'Network error. Please try again.', 'mailmojo' );
 		}
 
 		$this->set_connection_status( 'not_connected', $message );
