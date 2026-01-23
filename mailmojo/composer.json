@@ -8,6 +8,6 @@
         }
     ],
     "require": {
-        "eliksir/mailmojo-php-sdk": "^0.5.0"
+        "eliksir/mailmojo-php-sdk": "^0.6.0"
     }
 }

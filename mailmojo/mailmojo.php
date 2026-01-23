@@ -23,6 +23,14 @@ if ( file_exists( $autoload ) ) {
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
+$admin_file = __DIR__ . '/includes/class-mailmojo-admin.php';
+if ( file_exists( $admin_file ) ) {
+	require_once $admin_file;
+	if ( class_exists( 'Mailmojo_Admin' ) ) {
+		Mailmojo_Admin::init();
+	}
+}
 /**
  * Registers the block using a `blocks-manifest.php` file, which improves the performance of block type registration.
  * Behind the scenes, it also registers all assets so they can be enqueued

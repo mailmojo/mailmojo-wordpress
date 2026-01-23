@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ac3fe6ab4c5651d385e2ec3226ec627d",
+    "content-hash": "612f3381fee9ae391be07b6580ef710d",
     "packages": [
         {
             "name": "eliksir/mailmojo-php-sdk",
-            "version": "0.5.0",
+            "version": "0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mailmojo/mailmojo-php-sdk.git",
-                "reference": "2fdb443c8c6a1a7527b1528116da68b67e453191"
+                "reference": "91e1c914567a56da4ce17ada5b52b76c836bb00b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mailmojo/mailmojo-php-sdk/zipball/2fdb443c8c6a1a7527b1528116da68b67e453191",
-                "reference": "2fdb443c8c6a1a7527b1528116da68b67e453191",
+                "url": "https://api.github.com/repos/mailmojo/mailmojo-php-sdk/zipball/91e1c914567a56da4ce17ada5b52b76c836bb00b",
+                "reference": "91e1c914567a56da4ce17ada5b52b76c836bb00b",
                 "shasum": ""
             },
             "require": {
@@ -57,9 +57,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mailmojo/mailmojo-php-sdk/issues",
-                "source": "https://github.com/mailmojo/mailmojo-php-sdk/tree/0.5.0"
+                "source": "https://github.com/mailmojo/mailmojo-php-sdk/tree/0.6.0"
             },
-            "time": "2022-02-24T21:15:41+00:00"
+            "time": "2026-01-23T21:15:18+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
