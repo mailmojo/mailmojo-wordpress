@@ -1,0 +1,24 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Composer
+vendor/
+composer.lock
+
+# Build artifacts (depending on your policy)
+# NOTE: For WP.org you typically DO commit /build in the plugin folder,
+# but keep root-level build noise ignored.
+dist/
+.tmp/
+.cache/
+
+# wp-env
+.wp-env/

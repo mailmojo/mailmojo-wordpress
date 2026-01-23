@@ -1,0 +1,13 @@
+{
+    "name": "mailmojo/mailmojo-wordpress",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Frode Danielsen",
+            "email": "frode@mailmojo.no"
+        }
+    ],
+    "require": {
+        "eliksir/mailmojo-php-sdk": "^0.5.0"
+    }
+}
