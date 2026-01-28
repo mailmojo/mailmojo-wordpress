@@ -4,6 +4,7 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
+import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 
 /**
@@ -17,8 +18,13 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 export default function save() {
 	return (
-		<p { ...useBlockProps.save() }>
-			{ 'Mailmojo – hello from the saved content!' }
-		</p>
+		<a
+			{ ...useBlockProps.save( {
+				className: 'mailmojo-popup-button wp-element-button',
+			} ) }
+			href="#"
+		>
+			{ __( 'Subscribe to our newsletter', 'mailmojo' ) }
+		</a>
 	);
 }
