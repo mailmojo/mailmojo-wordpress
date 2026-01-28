@@ -7,6 +7,11 @@
   "port": 8888,
   "config": {
     "WP_DEBUG": true,
-    "SCRIPT_DEBUG": true
+    "SCRIPT_DEBUG": true,
+    "MAILMOJO_API_BASE_URL": "https://api.mailmojo.local/",
+    "MAILMOJO_DEV_CA_FILE": "/var/www/html/dev/rootCA.pem"
+  },
+  "mappings": {
+    "./dev/": "./dev/"
   }
 }
