@@ -1,0 +1,9 @@
+{
+  "name": "mailmojo-wordpress",
+  "private": true,
+  "scripts": {
+    "wp:start": "./wp-harness/bin/start-wordpress.sh",
+    "wp:stop": "./wp-harness/bin/stop-wordpress.sh",
+    "wp:reset": "./wp-harness/bin/reset-wordpress.sh"
+  }
+}
