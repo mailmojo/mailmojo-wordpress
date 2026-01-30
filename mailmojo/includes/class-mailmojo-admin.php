@@ -403,13 +403,25 @@ class Mailmojo_Admin {
 			return;
 		}
 
-		if ( empty( $result['password'] ) || empty( $result['item']['uuid'] ) ) {
+		if ( ! is_array( $result ) || 2 !== count( $result ) ) {
 			$this->set_application_password_status( 'error', __( 'Application password creation failed.', 'mailmojo' ) );
 			return;
 		}
 
-		$this->store_application_password( $user_id, $result['item'] );
-		$this->store_application_password_plaintext( $result['password'] );
+		list( $password, $password_item ) = $result;
+
+		if ( ! is_string( $password ) || '' === $password ) {
+			$this->set_application_password_status( 'error', __( 'Application password creation failed.', 'mailmojo' ) );
+			return;
+		}
+
+		if ( ! is_array( $password_item ) || empty( $password_item['uuid'] ) ) {
+			$this->set_application_password_status( 'error', __( 'Application password creation failed.', 'mailmojo' ) );
+			return;
+		}
+
+		$this->store_application_password( $user_id, $password_item );
+		$this->store_application_password_plaintext( $password );
 		$this->set_application_password_status( 'pending', __( 'Application password created and ready to send to Mailmojo.', 'mailmojo' ) );
 	}
 
