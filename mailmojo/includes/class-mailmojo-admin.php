@@ -12,12 +12,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Mailmojo_Admin {
 	private const ACCESS_TOKEN_OPTION      = 'mailmojo_access_token';
 	private const CONNECTION_STATUS_OPTION = 'mailmojo_connection_status';
+	private const SYNC_ENABLED_OPTION      = 'mailmojo_content_sync_enabled';
+	private const APP_PASSWORD_OPTION      = 'mailmojo_application_password';
+	private const APP_PASSWORD_STATUS      = 'mailmojo_application_password_status';
+	private const APP_PASSWORD_TRANSIENT   = 'mailmojo_application_password_plaintext';
+	private const APP_PASSWORD_NAME        = 'Mailmojo';
 
 	public static function init(): void {
 		$instance = new self();
 		add_action( 'admin_menu', array( $instance, 'register_menu' ) );
 		add_action( 'admin_post_mailmojo_save_token', array( $instance, 'handle_save_token' ) );
+		add_action( 'admin_post_mailmojo_save_sync', array( $instance, 'handle_save_sync' ) );
 		add_action( 'admin_post_mailmojo_test_connection', array( $instance, 'handle_test_connection' ) );
+		add_action( 'admin_post_mailmojo_regenerate_app_password', array( $instance, 'handle_regenerate_app_password' ) );
 	}
 
 	public function register_menu(): void {
@@ -38,14 +45,21 @@ class Mailmojo_Admin {
 
 		$token           = $this->get_access_token();
 		$status          = $this->get_connection_status();
+		$sync_enabled    = $this->is_content_sync_enabled();
+		$app_password    = $this->get_application_password();
+		$app_status      = $this->get_application_password_status();
+		$app_password_ui = $this->get_application_password_plaintext();
 		$replace_token   = $this->should_replace_token();
 		$notice          = $this->get_notice();
 		$masked_token    = $token ? str_repeat( '•', 8 ) : '';
 		$test_timestamp  = $status['tested_at'] ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $status['tested_at'] ) : '';
 		$status_label    = $this->get_status_label( $status['state'] );
 		$status_css      = $this->get_status_css_class( $status['state'] );
+		$app_status_css  = $this->get_app_status_css_class( $app_status['state'] );
+		$app_status_text = $this->get_app_status_label( $app_status['state'] );
 		$replace_url     = wp_nonce_url( admin_url( 'admin.php?page=mailmojo&mailmojo_replace_token=1' ), 'mailmojo_replace_token' );
 		$show_token_form = ( ! $token ) || $replace_token;
+		$regenerate_url  = wp_nonce_url( admin_url( 'admin-post.php?action=mailmojo_regenerate_app_password' ), 'mailmojo_regenerate_app_password' );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Mailmojo', 'mailmojo' ); ?></h1>
@@ -109,6 +123,76 @@ class Mailmojo_Admin {
 				</form>
 			<?php endif; ?>
 
+			<?php if ( $token ) : ?>
+				<h2><?php esc_html_e( 'Synchronize content to Mailmojo', 'mailmojo' ); ?></h2>
+				<p><?php esc_html_e( 'Enable content sync to make your WordPress posts available in Mailmojo for newsletters.', 'mailmojo' ); ?></p>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<?php wp_nonce_field( 'mailmojo_save_sync' ); ?>
+					<input type="hidden" name="action" value="mailmojo_save_sync" />
+					<table class="form-table" role="presentation">
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Content sync', 'mailmojo' ); ?></th>
+							<td>
+								<label>
+									<input
+										type="checkbox"
+										name="mailmojo_sync_enabled"
+										id="mailmojo-sync-enabled"
+										value="1"
+										<?php checked( $sync_enabled ); ?>
+									/>
+									<?php esc_html_e( 'Enable content sync to Mailmojo.', 'mailmojo' ); ?>
+								</label>
+							</td>
+						</tr>
+					</table>
+					<?php submit_button( __( 'Save sync settings', 'mailmojo' ) ); ?>
+				</form>
+
+				<?php if ( $sync_enabled ) : ?>
+					<h3><?php esc_html_e( 'Application password', 'mailmojo' ); ?></h3>
+					<p><?php esc_html_e( 'Mailmojo uses an application password to read data from your WordPress site.', 'mailmojo' ); ?></p>
+					<p>
+						<strong class="<?php echo esc_attr( $app_status_css ); ?>">
+							<?php echo esc_html( $app_status_text ); ?>
+						</strong>
+						<?php if ( $app_status['message'] ) : ?>
+							<span>— <?php echo esc_html( $app_status['message'] ); ?></span>
+						<?php endif; ?>
+					</p>
+					<?php if ( $app_password_ui ) : ?>
+						<table class="form-table" role="presentation">
+							<tr>
+								<th scope="row">
+									<label for="mailmojo-app-password"><?php esc_html_e( 'Application password', 'mailmojo' ); ?></label>
+								</th>
+								<td>
+									<input
+										type="password"
+										id="mailmojo-app-password"
+										class="regular-text"
+										value="<?php echo esc_attr( $app_password_ui ); ?>"
+										readonly
+									/>
+									<p class="description">
+										<?php esc_html_e( 'Copy this password now. For security, it is only shown once.', 'mailmojo' ); ?>
+									</p>
+								</td>
+							</tr>
+						</table>
+					<?php elseif ( $app_password['uuid'] ) : ?>
+						<p><?php esc_html_e( 'An application password is stored for this site. Regenerate it if you need to copy it again.', 'mailmojo' ); ?></p>
+					<?php else : ?>
+						<p><?php esc_html_e( 'No application password has been created yet. Enable sync to generate one.', 'mailmojo' ); ?></p>
+					<?php endif; ?>
+					<p>
+						<a class="button" href="<?php echo esc_url( $regenerate_url ); ?>">
+							<?php esc_html_e( 'Regenerate application password', 'mailmojo' ); ?>
+						</a>
+					</p>
+				<?php endif; ?>
+			<?php endif; ?>
+
 			<h2><?php esc_html_e( 'Test connection', 'mailmojo' ); ?></h2>
 			<p><?php esc_html_e( 'Verify that the saved token can connect to Mailmojo.', 'mailmojo' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -147,6 +231,25 @@ class Mailmojo_Admin {
 		$this->redirect_with_notice( 'token_saved' );
 	}
 
+	public function handle_save_sync(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'mailmojo' ) );
+		}
+
+		check_admin_referer( 'mailmojo_save_sync' );
+
+		$enabled = isset( $_POST['mailmojo_sync_enabled'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['mailmojo_sync_enabled'] ) );
+		update_option( self::SYNC_ENABLED_OPTION, $enabled ? '1' : '0', false );
+
+		if ( $enabled ) {
+			$this->ensure_application_password();
+		} else {
+			$this->set_application_password_status( 'not_created', __( 'Content sync is disabled.', 'mailmojo' ) );
+		}
+
+		$this->redirect_with_notice( 'sync_saved' );
+	}
+
 	public function handle_test_connection(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to perform this action.', 'mailmojo' ) );
@@ -170,6 +273,17 @@ class Mailmojo_Admin {
 			exit;
 			$this->handle_connection_error( $error );
 		}
+	}
+
+	public function handle_regenerate_app_password(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'mailmojo' ) );
+		}
+
+		check_admin_referer( 'mailmojo_regenerate_app_password' );
+
+		$this->ensure_application_password( true );
+		$this->redirect_with_notice( 'app_password_updated' );
 	}
 
 	private function test_connection_with_sdk( string $token ): void {
@@ -250,9 +364,198 @@ class Mailmojo_Admin {
 		);
 	}
 
+	private function ensure_application_password( bool $force_regenerate = false ): void {
+		if ( ! class_exists( 'WP_Application_Passwords' ) ) {
+			$this->set_application_password_status( 'not_available', __( 'Application passwords are not available on this WordPress version.', 'mailmojo' ) );
+			return;
+		}
+
+		$user_id = $this->get_application_password_user_id();
+		if ( 0 === $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( 0 === $user_id ) {
+			$this->set_application_password_status( 'error', __( 'Unable to determine a user for the application password.', 'mailmojo' ) );
+			return;
+		}
+
+		if ( $force_regenerate ) {
+			$this->delete_existing_application_password( $user_id );
+		}
+
+		$existing_password = $this->get_existing_application_password( $user_id );
+		if ( $existing_password ) {
+			$this->store_application_password( $user_id, $existing_password );
+			$this->set_application_password_status_if_needed();
+			return;
+		}
+
+		$result = WP_Application_Passwords::create_new_application_password(
+			$user_id,
+			array(
+				'name' => self::APP_PASSWORD_NAME,
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			$this->set_application_password_status( 'error', __( 'Unable to create an application password.', 'mailmojo' ) );
+			return;
+		}
+
+		if ( empty( $result['password'] ) || empty( $result['item']['uuid'] ) ) {
+			$this->set_application_password_status( 'error', __( 'Application password creation failed.', 'mailmojo' ) );
+			return;
+		}
+
+		$this->store_application_password( $user_id, $result['item'] );
+		$this->store_application_password_plaintext( $result['password'] );
+		$this->set_application_password_status( 'pending', __( 'Application password created and ready to send to Mailmojo.', 'mailmojo' ) );
+	}
+
+	private function get_existing_application_password( int $user_id ): ?array {
+		$passwords = WP_Application_Passwords::get_user_application_passwords( $user_id );
+		foreach ( $passwords as $password ) {
+			if ( self::APP_PASSWORD_NAME === $password['name'] ) {
+				return $password;
+			}
+		}
+
+		return null;
+	}
+
+	private function delete_existing_application_password( int $user_id ): void {
+		$existing = $this->get_existing_application_password( $user_id );
+		if ( ! $existing ) {
+			return;
+		}
+
+		WP_Application_Passwords::delete_application_password( $user_id, $existing['uuid'] );
+	}
+
+	private function store_application_password( int $user_id, array $password_item ): void {
+		update_option(
+			self::APP_PASSWORD_OPTION,
+			array(
+				'user_id'    => $user_id,
+				'uuid'       => $password_item['uuid'] ?? '',
+				'name'       => $password_item['name'] ?? self::APP_PASSWORD_NAME,
+				'created_at' => isset( $password_item['created'] ) ? (int) $password_item['created'] : time(),
+			),
+			false
+		);
+	}
+
+	private function store_application_password_plaintext( string $password ): void {
+		set_transient( self::APP_PASSWORD_TRANSIENT, $password, MINUTE_IN_SECONDS * 10 );
+	}
+
+	private function get_application_password_plaintext(): string {
+		$password = get_transient( self::APP_PASSWORD_TRANSIENT );
+		if ( is_string( $password ) ) {
+			delete_transient( self::APP_PASSWORD_TRANSIENT );
+			return $password;
+		}
+
+		return '';
+	}
+
+	private function get_application_password(): array {
+		$app_password = get_option( self::APP_PASSWORD_OPTION, array() );
+		if ( ! is_array( $app_password ) ) {
+			$app_password = array();
+		}
+
+		return wp_parse_args(
+			$app_password,
+			array(
+				'user_id'    => 0,
+				'uuid'       => '',
+				'name'       => self::APP_PASSWORD_NAME,
+				'created_at' => 0,
+			)
+		);
+	}
+
+	private function get_application_password_user_id(): int {
+		$password = $this->get_application_password();
+		return isset( $password['user_id'] ) ? (int) $password['user_id'] : 0;
+	}
+
+	private function set_application_password_status( string $state, string $message ): void {
+		update_option(
+			self::APP_PASSWORD_STATUS,
+			array(
+				'state'      => $state,
+				'message'    => $message,
+				'updated_at' => time(),
+			),
+			false
+		);
+	}
+
+	private function set_application_password_status_if_needed(): void {
+		$status = $this->get_application_password_status();
+		if ( 'sent' === $status['state'] ) {
+			return;
+		}
+
+		$this->set_application_password_status( 'pending', __( 'Application password created and ready to send to Mailmojo.', 'mailmojo' ) );
+	}
+
+	private function get_application_password_status(): array {
+		$status = get_option( self::APP_PASSWORD_STATUS, array() );
+		if ( ! is_array( $status ) ) {
+			$status = array();
+		}
+
+		return wp_parse_args(
+			$status,
+			array(
+				'state'      => 'not_created',
+				'message'    => '',
+				'updated_at' => 0,
+			)
+		);
+	}
+
+	private function get_app_status_label( string $state ): string {
+		switch ( $state ) {
+			case 'sent':
+				return __( 'Sent to Mailmojo', 'mailmojo' );
+			case 'pending':
+				return __( 'Ready to send', 'mailmojo' );
+			case 'not_available':
+				return __( 'Not available', 'mailmojo' );
+			case 'error':
+				return __( 'Action required', 'mailmojo' );
+			default:
+				return __( 'Not created', 'mailmojo' );
+		}
+	}
+
+	private function get_app_status_css_class( string $state ): string {
+		switch ( $state ) {
+			case 'sent':
+				return 'mailmojo-status mailmojo-status--connected';
+			case 'pending':
+				return 'mailmojo-status mailmojo-status--idle';
+			case 'not_available':
+			case 'error':
+				return 'mailmojo-status mailmojo-status--error';
+			default:
+				return 'mailmojo-status mailmojo-status--idle';
+		}
+	}
+
 	private function get_access_token(): string {
 		$token = get_option( self::ACCESS_TOKEN_OPTION, '' );
 		return is_string( $token ) ? $token : '';
+	}
+
+	private function is_content_sync_enabled(): bool {
+		$enabled = get_option( self::SYNC_ENABLED_OPTION, '0' );
+		return '1' === $enabled || true === $enabled;
 	}
 
 	private function get_connection_status(): array {
@@ -340,6 +643,14 @@ class Mailmojo_Admin {
 			'connection_failed'  => array(
 				'type'    => 'error',
 				'message' => __( 'Connection failed. Review the status message for details.', 'mailmojo' ),
+			),
+			'app_password_updated' => array(
+				'type'    => 'success',
+				'message' => __( 'Application password updated.', 'mailmojo' ),
+			),
+			'sync_saved'         => array(
+				'type'    => 'success',
+				'message' => __( 'Content sync settings saved.', 'mailmojo' ),
 			),
 		);
 
