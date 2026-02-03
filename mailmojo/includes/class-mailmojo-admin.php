@@ -59,7 +59,9 @@ class Mailmojo_Admin {
 		$app_status_css  = $this->get_app_status_css_class( $app_status['state'] );
 		$app_status_text = $this->get_app_status_label( $app_status['state'] );
 		$replace_url     = wp_nonce_url( admin_url( 'admin.php?page=mailmojo&mailmojo_replace_token=1' ), 'mailmojo_replace_token' );
+		$cancel_replace_url = admin_url( 'admin.php?page=mailmojo' );
 		$show_token_form = ( ! $token ) || $replace_token;
+		$show_token_features = $token && ! $show_token_form;
 		$regenerate_url  = wp_nonce_url( admin_url( 'admin-post.php?action=mailmojo_regenerate_app_password' ), 'mailmojo_regenerate_app_password' );
 		?>
 		<div class="wrap">
@@ -73,18 +75,20 @@ class Mailmojo_Admin {
 			<p><?php esc_html_e( 'Mailmojo helps you collect subscribers, show signup forms, and sync WordPress content to your Mailmojo account.', 'mailmojo' ); ?></p>
 			<p><?php esc_html_e( 'To connect this site, provide a Mailmojo API access token from your account settings.', 'mailmojo' ); ?></p>
 
-			<h2><?php esc_html_e( 'Connection status', 'mailmojo' ); ?></h2>
-			<p>
-				<strong class="<?php echo esc_attr( $status_css ); ?>">
-					<?php echo esc_html( $status_label ); ?>
-				</strong>
-				<?php if ( $status['message'] ) : ?>
-					<span>— <?php echo esc_html( $status['message'] ); ?></span>
-				<?php endif; ?>
-				<?php if ( $test_timestamp ) : ?>
-					<span><?php echo esc_html( sprintf( __( 'Last tested: %s', 'mailmojo' ), $test_timestamp ) ); ?></span>
-				<?php endif; ?>
-			</p>
+			<?php if ( $show_token_features ) : ?>
+				<h2><?php esc_html_e( 'Connection status', 'mailmojo' ); ?></h2>
+				<p>
+					<strong class="<?php echo esc_attr( $status_css ); ?>">
+						<?php echo esc_html( $status_label ); ?>
+					</strong>
+					<?php if ( $status['message'] ) : ?>
+						<span>— <?php echo esc_html( $status['message'] ); ?></span>
+					<?php endif; ?>
+					<?php if ( $test_timestamp ) : ?>
+						<span><?php echo esc_html( sprintf( __( 'Last tested: %s', 'mailmojo' ), $test_timestamp ) ); ?></span>
+					<?php endif; ?>
+				</p>
+			<?php endif; ?>
 
 			<h2><?php esc_html_e( 'Mailmojo API token', 'mailmojo' ); ?></h2>
 			<?php if ( $token && ! $show_token_form ) : ?>
@@ -120,11 +124,20 @@ class Mailmojo_Admin {
 							</td>
 						</tr>
 					</table>
-					<?php submit_button( __( 'Save token', 'mailmojo' ) ); ?>
+					<p class="submit">
+						<button type="submit" class="button button-primary">
+							<?php esc_html_e( 'Save token', 'mailmojo' ); ?>
+						</button>
+						<?php if ( $token ) : ?>
+							<a class="button button-secondary" href="<?php echo esc_url( $cancel_replace_url ); ?>">
+								<?php esc_html_e( 'Keep existing token', 'mailmojo' ); ?>
+							</a>
+						<?php endif; ?>
+					</p>
 				</form>
 			<?php endif; ?>
 
-			<?php if ( $token ) : ?>
+			<?php if ( $show_token_features ) : ?>
 				<h2><?php esc_html_e( 'Synchronize content to Mailmojo', 'mailmojo' ); ?></h2>
 				<p><?php esc_html_e( 'Enable content sync to make your WordPress posts available in Mailmojo for newsletters.', 'mailmojo' ); ?></p>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -194,13 +207,15 @@ class Mailmojo_Admin {
 				<?php endif; ?>
 			<?php endif; ?>
 
-			<h2><?php esc_html_e( 'Test connection', 'mailmojo' ); ?></h2>
-			<p><?php esc_html_e( 'Verify that the saved token can connect to Mailmojo.', 'mailmojo' ); ?></p>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<?php wp_nonce_field( 'mailmojo_test_connection' ); ?>
-				<input type="hidden" name="action" value="mailmojo_test_connection" />
-				<?php submit_button( __( 'Test connection', 'mailmojo' ), 'secondary' ); ?>
-			</form>
+			<?php if ( $show_token_features ) : ?>
+				<h2><?php esc_html_e( 'Test connection', 'mailmojo' ); ?></h2>
+				<p><?php esc_html_e( 'Verify that the saved token can connect to Mailmojo.', 'mailmojo' ); ?></p>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<?php wp_nonce_field( 'mailmojo_test_connection' ); ?>
+					<input type="hidden" name="action" value="mailmojo_test_connection" />
+					<?php submit_button( __( 'Test connection', 'mailmojo' ), 'secondary' ); ?>
+				</form>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
