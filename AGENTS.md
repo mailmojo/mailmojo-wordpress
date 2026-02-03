@@ -42,6 +42,9 @@ Before opening a PR:
 - Validate admin pages load without PHP notices/warnings
 - If blocks changed: insert block in editor + verify frontend render
 
+When modifying any block source or assets that impact the build output,
+always run `npm run build` so `mailmojo/build/*` stays in sync.
+
 ## WordPress Docker-free test harness (Codex/CI)
 
 Use the Docker-free harness when running WordPress locally in Codex or CI:
