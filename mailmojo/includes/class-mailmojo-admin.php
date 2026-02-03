@@ -8,6 +8,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+use GuzzleHttp\Client;
 
 class Mailmojo_Admin {
 	private const ACCESS_TOKEN_OPTION      = 'mailmojo_access_token';
@@ -295,35 +296,26 @@ class Mailmojo_Admin {
 			throw new RuntimeException( __( 'Mailmojo SDK is incomplete.', 'mailmojo' ) );
 		}
 
-		$lists_api  = new MailMojo\Api\ListApi();
-		$lists_api->getConfig()->setHost( $this->get_mailmojo_api_host() );
+		$api_host = $this->get_mailmojo_api_host();
+		$client = null;
+		if ( defined('MAILMOJO_DEV_CA_FILE') && MAILMOJO_DEV_CA_FILE &&
+				str_contains($api_host, 'api.mailmojo.local')) {
+			// Use custom Guzzle client with dev CA for self-signed certs in local dev environment
+			$verify = MAILMOJO_DEV_CA_FILE;
+			$client = new Client( array( 'verify' => $verify ) );
+		}
+
+		$lists_api  = new MailMojo\Api\ListApi($client);
+		$lists_api->getConfig()->setHost( $api_host );
 		$lists_api->getConfig()->setAccessToken( $token );
 		$lists_api->getLists();
 	}
 
 	private function get_mailmojo_api_host(): string {
-		$api_host = 'https://api.mailmojo.no/v1';
-		$is_local = false;
+		$api_host = 'https://api.mailmojo.no/';
 
-		if ( function_exists( 'wp_get_environment_type' ) ) {
-			$environment = wp_get_environment_type();
-			$is_local    = in_array( $environment, array( 'local', 'development' ), true );
-		}
-
-		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
-		if ( is_string( $site_host ) ) {
-			$site_host = strtolower( $site_host );
-			if ( in_array( $site_host, array( 'localhost', '127.0.0.1', '::1' ), true ) ) {
-				$is_local = true;
-			}
-
-			if ( preg_match( '/\\.(local|test|localhost)$/', $site_host ) ) {
-				$is_local = true;
-			}
-		}
-
-		if ( $is_local ) {
-			$api_host = 'https://api.mailmojo.local/v1';
+		if ( defined( 'MAILMOJO_API_BASE_URL' ) && MAILMOJO_API_BASE_URL ) {
+			$api_host = MAILMOJO_API_BASE_URL;
 		}
 
 		/**

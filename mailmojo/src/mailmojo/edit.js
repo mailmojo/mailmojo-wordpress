@@ -31,8 +31,12 @@ import './editor.scss';
  */
 export default function Edit() {
 	return (
-		<p { ...useBlockProps() }>
-			{ __( 'Mailmojo – hello from the editor!', 'mailmojo' ) }
-		</p>
+		<a
+			{ ...useBlockProps( { className: 'mailmojo-popup-button wp-element-button' } ) }
+			href="#"
+			onClick={ ( event ) => event.preventDefault() }
+		>
+			{ __( 'Subscribe to our newsletter', 'mailmojo' ) }
+		</a>
 	);
 }
