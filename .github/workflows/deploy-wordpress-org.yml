@@ -1,0 +1,75 @@
+name: Deploy WordPress.org Plugin
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: mailmojo/package-lock.json
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+
+      - name: Validate release versions
+        run: |
+          set -euo pipefail
+
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PLUGIN_VERSION="$(sed -n 's/^[[:space:]]*\* Version:[[:space:]]*//p' mailmojo/mailmojo.php | head -n 1 | xargs)"
+          STABLE_TAG="$(sed -n 's/^Stable tag:[[:space:]]*//Ip' mailmojo/readme.txt | head -n 1 | xargs)"
+
+          echo "Tag version: ${TAG_VERSION}"
+          echo "Plugin header version: ${PLUGIN_VERSION}"
+          echo "Readme stable tag: ${STABLE_TAG}"
+
+          test -n "${PLUGIN_VERSION}" || (echo "Missing version in mailmojo/mailmojo.php" && exit 1)
+          test -n "${STABLE_TAG}" || (echo "Missing stable tag in mailmojo/readme.txt" && exit 1)
+
+          if [ "${TAG_VERSION}" != "${PLUGIN_VERSION}" ]; then
+            echo "Tag version must match plugin version."
+            exit 1
+          fi
+
+          if [ "${TAG_VERSION}" != "${STABLE_TAG}" ]; then
+            echo "Tag version must match readme stable tag."
+            exit 1
+          fi
+
+      - name: Install Node dependencies
+        run: npm ci --prefix mailmojo
+
+      - name: Build plugin assets
+        run: npm run build --prefix mailmojo
+
+      - name: Install Composer dependencies
+        run: composer install --working-dir=mailmojo --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: Deploy to WordPress.org
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SLUG: mailmojo
+          BUILD_DIR: mailmojo
+          SVN_USERNAME: ${{ secrets.WP_ORG_SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.WP_ORG_SVN_PASSWORD }}
