@@ -9,9 +9,15 @@
     "WP_DEBUG": true,
     "SCRIPT_DEBUG": true,
     "MAILMOJO_API_BASE_URL": "https://api.mailmojo.local/",
-    "MAILMOJO_DEV_CA_FILE": "/var/www/html/dev/rootCA.pem"
+    "MAILMOJO_DEV_CA_FILE": "/var/www/html/dev/rootCA.pem",
+    "WP_HOME": "http://wp.dev.local:8888",
+    "WP_SITEURL": "http://wp.dev.local:8888"
   },
   "mappings": {
     "./dev/": "./dev/"
-  }
+  },
+  "lifecycleScripts": {
+    "afterStart": "bash ./dev/wp-env/connect-dev-shared.sh"
+  },
+  "testsEnvironment": false
 }

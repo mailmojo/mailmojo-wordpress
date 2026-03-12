@@ -7,17 +7,39 @@ WP_DIR="$HARNESS_DIR/wordpress"
 RUNTIME_DIR="$HARNESS_DIR/runtime"
 
 PORT="${WP_PORT:-8888}"
-URL="http://localhost:${PORT}"
+HOST="${WP_HOST:-localhost}"
+URL="${WP_URL:-http://${HOST}:${PORT}}"
 
-if ! command -v wp >/dev/null 2>&1; then
-  echo "wp-cli is required but was not found in PATH." >&2
-  exit 1
+WP_CLI_BIN="${WP_CLI_BIN:-}"
+PHP_BIN="${PHP_BIN:-php}"
+WP_CLI_PHP_ARGS="${WP_CLI_PHP_ARGS:--d memory_limit=512M}"
+WP_CLI_PHAR="$RUNTIME_DIR/wp-cli.phar"
+WP_CLI_URL="https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
+
+if [[ -n "$WP_CLI_BIN" ]]; then
+  WP="$WP_CLI_BIN"
+elif command -v wp >/dev/null 2>&1; then
+  WP="wp"
+elif [[ -f "$WP_CLI_PHAR" ]]; then
+  WP="$PHP_BIN $WP_CLI_PHP_ARGS $WP_CLI_PHAR"
+else
+  if command -v curl >/dev/null 2>&1; then
+    curl -sSL "$WP_CLI_URL" -o "$WP_CLI_PHAR"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO "$WP_CLI_PHAR" "$WP_CLI_URL"
+  else
+    echo "wp-cli is required but was not found in PATH." >&2
+    echo "Install wp-cli, or set WP_CLI_BIN, or provide curl/wget to auto-download." >&2
+    exit 1
+  fi
+  chmod +x "$WP_CLI_PHAR"
+  WP="$PHP_BIN $WP_CLI_PHP_ARGS $WP_CLI_PHAR"
 fi
 
 mkdir -p "$WP_DIR" "$RUNTIME_DIR"
 
 if [[ ! -f "$WP_DIR/wp-load.php" ]]; then
-  wp core download --path="$WP_DIR" --quiet
+  $WP core download --path="$WP_DIR" --quiet
 fi
 
 mkdir -p "$WP_DIR/wp-content/database" "$WP_DIR/wp-content/plugins"
@@ -67,8 +89,8 @@ if [[ ! -e "$PLUGIN_TARGET" ]]; then
   ln -s "$ROOT_DIR/mailmojo" "$PLUGIN_TARGET"
 fi
 
-if ! wp core is-installed --path="$WP_DIR" >/dev/null 2>&1; then
-  wp core install \
+if ! $WP core is-installed --path="$WP_DIR" >/dev/null 2>&1; then
+  $WP core install \
     --path="$WP_DIR" \
     --url="$URL" \
     --title="Mailmojo Local" \
@@ -78,4 +100,4 @@ if ! wp core is-installed --path="$WP_DIR" >/dev/null 2>&1; then
     --skip-email
 fi
 
-wp plugin activate mailmojo --path="$WP_DIR" >/dev/null
+$WP plugin activate mailmojo --path="$WP_DIR" >/dev/null

@@ -1,0 +1,14 @@
+version: "3.8"
+
+networks:
+  dev-shared:
+    external: true
+
+services:
+  wordpress:
+    networks:
+      - dev-shared
+
+  db:
+    networks:
+      - dev-shared

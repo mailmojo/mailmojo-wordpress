@@ -18,6 +18,8 @@ class Mailmojo_Admin {
 	private const APP_PASSWORD_STATUS      = 'mailmojo_application_password_status';
 	private const APP_PASSWORD_TRANSIENT   = 'mailmojo_application_password_plaintext';
 	private const APP_PASSWORD_NAME        = 'Mailmojo';
+	private const INTEGRATION_ID           = 'wordpress';
+	private const LAST_API_ERROR_OPTION    = 'mailmojo_last_api_error';
 
 	public static function init(): void {
 		$instance = new self();
@@ -47,55 +49,87 @@ class Mailmojo_Admin {
 		$token           = $this->get_access_token();
 		$status          = $this->get_connection_status();
 		$sync_enabled    = $this->is_content_sync_enabled();
-		$app_password    = $this->get_application_password();
 		$app_status      = $this->get_application_password_status();
-		$app_password_ui = $this->get_application_password_plaintext();
 		$replace_token   = $this->should_replace_token();
 		$notice          = $this->get_notice();
 		$masked_token    = $token ? str_repeat( '•', 8 ) : '';
 		$test_timestamp  = $status['tested_at'] ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $status['tested_at'] ) : '';
 		$status_label    = $this->get_status_label( $status['state'] );
 		$status_css      = $this->get_status_css_class( $status['state'] );
+		$status_icon     = $this->get_connection_status_icon_class( $status['state'] );
 		$app_status_css  = $this->get_app_status_css_class( $app_status['state'] );
 		$app_status_text = $this->get_app_status_label( $app_status['state'] );
+		$app_status_icon = $this->get_sync_status_icon_class( $app_status['state'] );
+		$sync_checked_at = $app_status['updated_at'] ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $app_status['updated_at'] ) : '';
+		$api_error_notice = $this->get_last_api_error_notice();
 		$replace_url     = wp_nonce_url( admin_url( 'admin.php?page=mailmojo&mailmojo_replace_token=1' ), 'mailmojo_replace_token' );
 		$cancel_replace_url = admin_url( 'admin.php?page=mailmojo' );
 		$show_token_form = ( ! $token ) || $replace_token;
 		$show_token_features = $token && ! $show_token_form;
 		$regenerate_url  = wp_nonce_url( admin_url( 'admin-post.php?action=mailmojo_regenerate_app_password' ), 'mailmojo_regenerate_app_password' );
+
 		?>
 		<div class="wrap">
+			<style>
+				.mailmojo-table th,
+				.mailmojo-table td {
+					padding-top: 8px;
+					padding-bottom: 8px;
+				}
+				.mailmojo-section {
+					margin-top: 28px;
+				}
+				.mailmojo-section:first-of-type {
+					margin-top: 0;
+				}
+				.mailmojo-actions .button + .button {
+					margin-left: 6px;
+				}
+			</style>
 			<h1><?php esc_html_e( 'Mailmojo', 'mailmojo' ); ?></h1>
 			<?php if ( $notice ) : ?>
 				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?> is-dismissible">
 					<p><?php echo esc_html( $notice['message'] ); ?></p>
 				</div>
 			<?php endif; ?>
+			<?php if ( $show_token_features && $sync_enabled && 'error' === $app_status['state'] && $app_status['message'] ) : ?>
+				<div class="notice notice-error is-dismissible">
+					<p><?php echo esc_html( $app_status['message'] ); ?></p>
+				</div>
+			<?php endif; ?>
+			<?php if ( $api_error_notice ) : ?>
+				<div class="notice notice-error is-dismissible">
+					<p><?php echo esc_html( $api_error_notice ); ?></p>
+				</div>
+			<?php endif; ?>
 
 			<p><?php esc_html_e( 'Mailmojo helps you collect subscribers, show signup forms, and sync WordPress content to your Mailmojo account.', 'mailmojo' ); ?></p>
 			<p><?php esc_html_e( 'To connect this site, provide a Mailmojo API access token from your account settings.', 'mailmojo' ); ?></p>
 
-			<?php if ( $show_token_features ) : ?>
-				<h2><?php esc_html_e( 'Connection status', 'mailmojo' ); ?></h2>
-				<p>
-					<strong class="<?php echo esc_attr( $status_css ); ?>">
-						<?php echo esc_html( $status_label ); ?>
-					</strong>
-					<?php if ( $status['message'] ) : ?>
-						<span>— <?php echo esc_html( $status['message'] ); ?></span>
-					<?php endif; ?>
-					<?php if ( $test_timestamp ) : ?>
-						<span><?php echo esc_html( sprintf( __( 'Last tested: %s', 'mailmojo' ), $test_timestamp ) ); ?></span>
-					<?php endif; ?>
-				</p>
-			<?php endif; ?>
-
-			<h2><?php esc_html_e( 'Mailmojo API token', 'mailmojo' ); ?></h2>
+			<h2 class="mailmojo-section"><?php esc_html_e( 'Mailmojo API token', 'mailmojo' ); ?></h2>
 			<?php if ( $token && ! $show_token_form ) : ?>
-				<p>
-					<?php echo esc_html( sprintf( __( 'Saved token: %s', 'mailmojo' ), $masked_token ) ); ?>
-				</p>
-				<p>
+				<table class="form-table mailmojo-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Saved token', 'mailmojo' ); ?></th>
+						<td><?php echo esc_html( $masked_token ); ?></td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Status', 'mailmojo' ); ?></th>
+						<td>
+							<strong class="<?php echo esc_attr( $status_css ); ?>">
+								<span class="dashicons <?php echo esc_attr( $status_icon ); ?>" aria-hidden="true"></span>
+								<?php echo esc_html( $status_label ); ?>
+							</strong>
+							<?php if ( $status['message'] ) : ?>
+								<span>— <?php echo esc_html( $status['message'] ); ?></span>
+							<?php endif; ?>
+							<?php if ( $test_timestamp ) : ?>
+								<span><?php echo esc_html( sprintf( __( 'Last tested: %s', 'mailmojo' ), $test_timestamp ) ); ?></span>
+							<?php endif; ?>
+						</td>
+					</tr>
+				</table>
+				<p class="mailmojo-actions">
 					<a class="button" href="<?php echo esc_url( $replace_url ); ?>">
 						<?php esc_html_e( 'Replace token', 'mailmojo' ); ?>
 					</a>
@@ -138,12 +172,11 @@ class Mailmojo_Admin {
 			<?php endif; ?>
 
 			<?php if ( $show_token_features ) : ?>
-				<h2><?php esc_html_e( 'Synchronize content to Mailmojo', 'mailmojo' ); ?></h2>
-				<p><?php esc_html_e( 'Enable content sync to make your WordPress posts available in Mailmojo for newsletters.', 'mailmojo' ); ?></p>
+				<h2 class="mailmojo-section"><?php esc_html_e( 'Synchronize content to Mailmojo', 'mailmojo' ); ?></h2>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<?php wp_nonce_field( 'mailmojo_save_sync' ); ?>
 					<input type="hidden" name="action" value="mailmojo_save_sync" />
-					<table class="form-table" role="presentation">
+					<table class="form-table mailmojo-table" role="presentation">
 						<tr>
 							<th scope="row"><?php esc_html_e( 'Content sync', 'mailmojo' ); ?></th>
 							<td>
@@ -159,56 +192,41 @@ class Mailmojo_Admin {
 								</label>
 							</td>
 						</tr>
-					</table>
-					<?php submit_button( __( 'Save sync settings', 'mailmojo' ) ); ?>
-				</form>
-
-				<?php if ( $sync_enabled ) : ?>
-					<h3><?php esc_html_e( 'Application password', 'mailmojo' ); ?></h3>
-					<p><?php esc_html_e( 'Mailmojo uses an application password to read data from your WordPress site.', 'mailmojo' ); ?></p>
-					<p>
-						<strong class="<?php echo esc_attr( $app_status_css ); ?>">
-							<?php echo esc_html( $app_status_text ); ?>
-						</strong>
-						<?php if ( $app_status['message'] ) : ?>
-							<span>— <?php echo esc_html( $app_status['message'] ); ?></span>
-						<?php endif; ?>
-					</p>
-					<?php if ( $app_password_ui ) : ?>
-						<table class="form-table" role="presentation">
+						<?php if ( $sync_enabled ) : ?>
 							<tr>
-								<th scope="row">
-									<label for="mailmojo-app-password"><?php esc_html_e( 'Application password', 'mailmojo' ); ?></label>
-								</th>
+								<th scope="row"><?php esc_html_e( 'Status', 'mailmojo' ); ?></th>
 								<td>
-									<input
-										type="password"
-										id="mailmojo-app-password"
-										class="regular-text"
-										value="<?php echo esc_attr( $app_password_ui ); ?>"
-										readonly
-									/>
-									<p class="description">
-										<?php esc_html_e( 'Copy this password now. For security, it is only shown once.', 'mailmojo' ); ?>
+									<p>
+										<strong class="<?php echo esc_attr( $app_status_css ); ?>">
+											<span class="dashicons <?php echo esc_attr( $app_status_icon ); ?>" aria-hidden="true"></span>
+											<?php echo esc_html( $app_status_text ); ?>
+										</strong>
+										<?php if ( $app_status['message'] ) : ?>
+											<span>— <?php echo esc_html( $app_status['message'] ); ?></span>
+										<?php endif; ?>
+										<?php if ( $sync_checked_at ) : ?>
+											<span><?php echo esc_html( sprintf( __( 'Last checked: %s', 'mailmojo' ), $sync_checked_at ) ); ?></span>
+										<?php endif; ?>
 									</p>
 								</td>
 							</tr>
-						</table>
-					<?php elseif ( $app_password['uuid'] ) : ?>
-						<p><?php esc_html_e( 'An application password is stored for this site. Regenerate it if you need to copy it again.', 'mailmojo' ); ?></p>
-					<?php else : ?>
-						<p><?php esc_html_e( 'No application password has been created yet. Enable sync to generate one.', 'mailmojo' ); ?></p>
-					<?php endif; ?>
-					<p>
-						<a class="button" href="<?php echo esc_url( $regenerate_url ); ?>">
-							<?php esc_html_e( 'Regenerate application password', 'mailmojo' ); ?>
-						</a>
+						<?php endif; ?>
+					</table>
+					<p class="submit mailmojo-actions">
+						<button type="submit" class="button button-primary">
+							<?php esc_html_e( 'Save sync settings', 'mailmojo' ); ?>
+						</button>
+						<?php if ( $sync_enabled ) : ?>
+							<a class="button button-secondary" href="<?php echo esc_url( $regenerate_url ); ?>">
+								<?php esc_html_e( 'Refresh connection', 'mailmojo' ); ?>
+							</a>
+						<?php endif; ?>
 					</p>
-				<?php endif; ?>
+				</form>
 			<?php endif; ?>
 
 			<?php if ( $show_token_features ) : ?>
-				<h2><?php esc_html_e( 'Test connection', 'mailmojo' ); ?></h2>
+				<h2 class="mailmojo-section"><?php esc_html_e( 'Test connection', 'mailmojo' ); ?></h2>
 				<p><?php esc_html_e( 'Verify that the saved token can connect to Mailmojo.', 'mailmojo' ); ?></p>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<?php wp_nonce_field( 'mailmojo_test_connection' ); ?>
@@ -259,6 +277,11 @@ class Mailmojo_Admin {
 
 		if ( $enabled ) {
 			$this->ensure_application_password();
+			$this->sync_mailmojo_integration_status();
+			$app_status = $this->get_application_password_status();
+			if ( 'sent' !== $app_status['state'] ) {
+				$this->redirect_with_notice( 'sync_needs_attention' );
+			}
 		} else {
 			$this->set_application_password_status( 'not_created', __( 'Content sync is disabled.', 'mailmojo' ) );
 		}
@@ -277,16 +300,21 @@ class Mailmojo_Admin {
 
 		if ( '' === $token ) {
 			$this->set_connection_status( 'not_connected', __( 'No token saved.', 'mailmojo' ) );
+			if ( $this->is_content_sync_enabled() ) {
+				$this->set_application_password_status( 'error', __( 'Mailmojo token is missing.', 'mailmojo' ) );
+			}
 			$this->redirect_with_notice( 'token_missing' );
 		}
 
 		try {
 			$this->test_connection_with_sdk( $token );
 			$this->set_connection_status( 'connected', __( 'Connection successful.', 'mailmojo' ) );
+			$this->sync_mailmojo_integration_status();
 			$this->redirect_with_notice( 'connection_success' );
 		} catch ( Throwable $error ) {
-			var_dump( $error );
-			exit;
+			if ( $this->is_content_sync_enabled() ) {
+				$this->set_application_password_status( 'error', __( 'Mailmojo token could not be verified.', 'mailmojo' ) );
+			}
 			$this->handle_connection_error( $error );
 		}
 	}
@@ -299,6 +327,11 @@ class Mailmojo_Admin {
 		check_admin_referer( 'mailmojo_regenerate_app_password' );
 
 		$this->ensure_application_password( true );
+		$app_status = $this->get_application_password_status();
+		if ( 'error' === $app_status['state'] ) {
+			$this->redirect_with_notice( 'app_password_failed' );
+		}
+
 		$this->redirect_with_notice( 'app_password_updated' );
 	}
 
@@ -312,18 +345,35 @@ class Mailmojo_Admin {
 		}
 
 		$api_host = $this->get_mailmojo_api_host();
-		$client = null;
-		if ( defined('MAILMOJO_DEV_CA_FILE') && MAILMOJO_DEV_CA_FILE &&
-				str_contains($api_host, 'api.mailmojo.local')) {
-			// Use custom Guzzle client with dev CA for self-signed certs in local dev environment
-			$verify = MAILMOJO_DEV_CA_FILE;
-			$client = new Client( array( 'verify' => $verify ) );
+		$client = $this->create_mailmojo_http_client( $api_host );
+		$config = MailMojo\Configuration::getDefaultConfiguration();
+		$config->setHost( $api_host );
+		$config->setAccessToken( $token );
+
+		$lists_api  = new MailMojo\Api\ListApi( $client, $config );
+		$lists_api->getLists();
+	}
+
+	private function create_mailmojo_http_client( string $api_host ): Client {
+		if ( defined( 'MAILMOJO_DEV_CA_FILE' ) && MAILMOJO_DEV_CA_FILE && str_contains( $api_host, 'api.mailmojo.local' ) ) {
+			return new Client( array( 'verify' => MAILMOJO_DEV_CA_FILE ) );
 		}
 
-		$lists_api  = new MailMojo\Api\ListApi($client);
-		$lists_api->getConfig()->setHost( $api_host );
-		$lists_api->getConfig()->setAccessToken( $token );
-		$lists_api->getLists();
+		return new Client();
+	}
+
+	private function get_account_api( string $token ): MailMojo\Api\AccountApi {
+		if ( ! class_exists( 'MailMojo\\Configuration' ) || ! class_exists( 'MailMojo\\Api\\AccountApi' ) ) {
+			throw new RuntimeException( __( 'Mailmojo SDK is incomplete.', 'mailmojo' ) );
+		}
+
+		$api_host = $this->get_mailmojo_api_host();
+		$client = $this->create_mailmojo_http_client( $api_host );
+		$config = MailMojo\Configuration::getDefaultConfiguration();
+		$config->setHost( $api_host );
+		$config->setAccessToken( $token );
+
+		return new MailMojo\Api\AccountApi( $client, $config );
 	}
 
 	private function get_mailmojo_api_host(): string {
@@ -373,7 +423,7 @@ class Mailmojo_Admin {
 
 	private function ensure_application_password( bool $force_regenerate = false ): void {
 		if ( ! class_exists( 'WP_Application_Passwords' ) ) {
-			$this->set_application_password_status( 'not_available', __( 'Application passwords are not available on this WordPress version.', 'mailmojo' ) );
+			$this->set_application_password_status( 'not_available', __( 'Sync connection is not available on this WordPress version.', 'mailmojo' ) );
 			return;
 		}
 
@@ -383,7 +433,7 @@ class Mailmojo_Admin {
 		}
 
 		if ( 0 === $user_id ) {
-			$this->set_application_password_status( 'error', __( 'Unable to determine a user for the application password.', 'mailmojo' ) );
+			$this->set_application_password_status( 'error', __( 'Unable to determine a user for the sync connection.', 'mailmojo' ) );
 			return;
 		}
 
@@ -406,30 +456,30 @@ class Mailmojo_Admin {
 		);
 
 		if ( is_wp_error( $result ) ) {
-			$this->set_application_password_status( 'error', __( 'Unable to create an application password.', 'mailmojo' ) );
+			$this->set_application_password_status( 'error', __( 'Unable to create sync connection.', 'mailmojo' ) );
 			return;
 		}
 
 		if ( ! is_array( $result ) || 2 !== count( $result ) ) {
-			$this->set_application_password_status( 'error', __( 'Application password creation failed.', 'mailmojo' ) );
+			$this->set_application_password_status( 'error', __( 'Sync connection setup failed.', 'mailmojo' ) );
 			return;
 		}
 
 		list( $password, $password_item ) = $result;
 
 		if ( ! is_string( $password ) || '' === $password ) {
-			$this->set_application_password_status( 'error', __( 'Application password creation failed.', 'mailmojo' ) );
+			$this->set_application_password_status( 'error', __( 'Sync connection setup failed.', 'mailmojo' ) );
 			return;
 		}
 
 		if ( ! is_array( $password_item ) || empty( $password_item['uuid'] ) ) {
-			$this->set_application_password_status( 'error', __( 'Application password creation failed.', 'mailmojo' ) );
+			$this->set_application_password_status( 'error', __( 'Sync connection setup failed.', 'mailmojo' ) );
 			return;
 		}
 
 		$this->store_application_password( $user_id, $password_item );
 		$this->store_application_password_plaintext( $password );
-		$this->set_application_password_status( 'pending', __( 'Application password created and ready to send to Mailmojo.', 'mailmojo' ) );
+		$this->sync_mailmojo_integration_status();
 	}
 
 	private function get_existing_application_password( int $user_id ): ?array {
@@ -491,9 +541,20 @@ class Mailmojo_Admin {
 				'user_id'    => 0,
 				'uuid'       => '',
 				'name'       => self::APP_PASSWORD_NAME,
+				'username'   => '',
+				'token_hash' => '',
 				'created_at' => 0,
 			)
 		);
+	}
+
+	private function update_application_password_metadata( int $user_id, string $username, string $password ): void {
+		$app_password = $this->get_application_password();
+		$app_password['user_id'] = $user_id;
+		$app_password['username'] = $username;
+		$app_password['token_hash'] = $this->hash_application_password( $password );
+
+		update_option( self::APP_PASSWORD_OPTION, $app_password, false );
 	}
 
 	private function get_application_password_user_id(): int {
@@ -519,7 +580,13 @@ class Mailmojo_Admin {
 			return;
 		}
 
-		$this->set_application_password_status( 'pending', __( 'Application password created and ready to send to Mailmojo.', 'mailmojo' ) );
+		$app_password = $this->get_application_password();
+		if ( empty( $app_password['token_hash'] ) || empty( $app_password['username'] ) ) {
+			$this->set_application_password_status( 'needs_refresh', __( 'Sync connection needs to be refreshed.', 'mailmojo' ) );
+			return;
+		}
+
+		$this->set_application_password_status( 'pending', __( 'Sync connection is ready to update in Mailmojo.', 'mailmojo' ) );
 	}
 
 	private function get_application_password_status(): array {
@@ -541,9 +608,11 @@ class Mailmojo_Admin {
 	private function get_app_status_label( string $state ): string {
 		switch ( $state ) {
 			case 'sent':
-				return __( 'Sent to Mailmojo', 'mailmojo' );
+				return __( 'Up to date', 'mailmojo' );
 			case 'pending':
-				return __( 'Ready to send', 'mailmojo' );
+				return __( 'Ready to update', 'mailmojo' );
+			case 'needs_refresh':
+				return __( 'Refresh needed', 'mailmojo' );
 			case 'not_available':
 				return __( 'Not available', 'mailmojo' );
 			case 'error':
@@ -559,6 +628,8 @@ class Mailmojo_Admin {
 				return 'mailmojo-status mailmojo-status--connected';
 			case 'pending':
 				return 'mailmojo-status mailmojo-status--idle';
+			case 'needs_refresh':
+				return 'mailmojo-status mailmojo-status--error';
 			case 'not_available':
 			case 'error':
 				return 'mailmojo-status mailmojo-status--error';
@@ -615,6 +686,359 @@ class Mailmojo_Admin {
 		}
 	}
 
+	private function get_connection_status_icon_class( string $state ): string {
+		switch ( $state ) {
+			case 'connected':
+				return 'dashicons-yes-alt';
+			case 'not_connected':
+				return 'dashicons-no-alt';
+			default:
+				return 'dashicons-minus';
+		}
+	}
+
+	private function get_sync_status_icon_class( string $state ): string {
+		switch ( $state ) {
+			case 'sent':
+				return 'dashicons-yes-alt';
+			case 'needs_refresh':
+			case 'not_available':
+			case 'error':
+				return 'dashicons-no-alt';
+			default:
+				return 'dashicons-minus';
+		}
+	}
+
+	private function sync_mailmojo_integration_status(): void {
+		if ( ! $this->is_content_sync_enabled() ) {
+			return;
+		}
+
+		$token = $this->get_access_token();
+		if ( '' === $token ) {
+			$this->set_application_password_status( 'error', __( 'Mailmojo token is missing.', 'mailmojo' ) );
+			return;
+		}
+
+		$app_password = $this->get_application_password();
+		if ( empty( $app_password['uuid'] ) ) {
+			$this->set_application_password_status( 'not_created', __( 'Sync connection has not been created yet.', 'mailmojo' ) );
+			return;
+		}
+
+		$user_id = (int) $app_password['user_id'];
+		if ( 0 === $user_id ) {
+			$this->set_application_password_status( 'error', __( 'Unable to determine sync connection user.', 'mailmojo' ) );
+			return;
+		}
+
+		$password = $this->get_application_password_plaintext();
+		if ( '' !== $password ) {
+			$this->update_mailmojo_integration_settings( $token, $password, $user_id );
+			return;
+		}
+
+		$this->verify_mailmojo_integration_settings( $token, $app_password );
+	}
+
+	private function update_mailmojo_integration_settings( string $token, string $password, int $user_id ): void {
+		$username = $this->get_username_for_user_id( $user_id );
+		if ( '' === $username ) {
+			$this->set_application_password_status( 'error', __( 'Unable to determine sync connection user.', 'mailmojo' ) );
+			return;
+		}
+
+		$settings = array(
+			'site_url' => site_url(),
+			'token'    => $password,
+			'username' => $username,
+		);
+
+		try {
+			$account_api = $this->get_account_api( $token );
+			$account_api->updateAccountIntegration( self::INTEGRATION_ID, (object) $settings );
+			$this->update_application_password_metadata( $user_id, $username, $password );
+			$this->clear_last_api_error();
+			$this->set_application_password_status( 'sent', __( 'Mailmojo has the latest sync connection.', 'mailmojo' ) );
+		} catch ( Throwable $error ) {
+			$api_message = $this->format_api_error_message( $error );
+			$this->store_last_api_error( $api_message );
+			$this->set_application_password_status(
+				'error',
+				sprintf(
+					/* translators: %s is an API error summary. */
+					__( 'Unable to update Mailmojo sync connection. %s', 'mailmojo' ),
+					$api_message
+				)
+			);
+		}
+	}
+
+	private function verify_mailmojo_integration_settings( string $token, array $app_password ): void {
+		if ( empty( $app_password['token_hash'] ) || empty( $app_password['username'] ) ) {
+			$this->set_application_password_status( 'needs_refresh', __( 'Sync connection needs to be refreshed.', 'mailmojo' ) );
+			return;
+		}
+
+		$settings = $this->get_mailmojo_integration_settings( $token );
+		if ( null === $settings ) {
+			$this->set_application_password_status( 'pending', __( 'Sync connection has not been stored in Mailmojo yet.', 'mailmojo' ) );
+			return;
+		}
+
+		$remote_username = isset( $settings['username'] ) ? (string) $settings['username'] : '';
+		$remote_token = isset( $settings['token'] ) ? (string) $settings['token'] : '';
+		$remote_site_url = isset( $settings['site_url'] ) ? (string) $settings['site_url'] : '';
+
+		$matches = (
+			$remote_username === (string) $app_password['username']
+			&& '' !== $remote_token
+			&& $this->hash_application_password( $remote_token ) === (string) $app_password['token_hash']
+			&& $remote_site_url === site_url()
+		);
+
+		if ( $matches ) {
+			$this->clear_last_api_error();
+			$this->set_application_password_status( 'sent', __( 'Mailmojo has the latest sync connection.', 'mailmojo' ) );
+			return;
+		}
+
+		$this->set_application_password_status( 'needs_refresh', __( 'Mailmojo has different sync connection settings.', 'mailmojo' ) );
+	}
+
+	private function get_mailmojo_integration_settings( string $token ): ?array {
+		try {
+			$account_api = $this->get_account_api( $token );
+			$result = $account_api->getAccountIntegrations();
+		} catch ( Throwable $error ) {
+			$api_message = $this->format_api_error_message( $error );
+			$this->store_last_api_error( $api_message );
+			$this->set_application_password_status(
+				'error',
+				sprintf(
+					/* translators: %s is an API error summary. */
+					__( 'Unable to verify sync connection with Mailmojo. %s', 'mailmojo' ),
+					$api_message
+				)
+			);
+			return null;
+		}
+
+		$integrations = $this->normalize_integration_list( $result );
+		foreach ( $integrations as $integration ) {
+			$integration_id = '';
+			$data = null;
+
+			if ( is_object( $integration ) && method_exists( $integration, 'getIntegrationId' ) ) {
+				$integration_id = (string) $integration->getIntegrationId();
+				if ( method_exists( $integration, 'getData' ) ) {
+					$data = $integration->getData();
+				}
+			} elseif ( is_object( $integration ) ) {
+				$integration_id = isset( $integration->integration_id ) ? (string) $integration->integration_id : '';
+				$data = $integration->data ?? null;
+			} elseif ( is_array( $integration ) ) {
+				$integration_id = isset( $integration['integration_id'] ) ? (string) $integration['integration_id'] : '';
+				$data = $integration['data'] ?? null;
+			}
+
+			if ( self::INTEGRATION_ID !== $integration_id ) {
+				continue;
+			}
+
+			if ( is_string( $data ) && '' !== $data ) {
+				$decoded = json_decode( $data, true );
+				if ( is_array( $decoded ) ) {
+					$data = $decoded;
+				}
+			}
+
+			if ( is_object( $data ) ) {
+				$data = (array) $data;
+			}
+
+			if ( is_array( $data ) ) {
+				if ( isset( $data['settings'] ) && is_array( $data['settings'] ) ) {
+					return $data['settings'];
+				}
+				if ( isset( $data['settings'] ) && is_object( $data['settings'] ) ) {
+					return (array) $data['settings'];
+				}
+
+				return $data;
+			}
+		}
+
+		return null;
+	}
+
+	private function normalize_integration_list( $result ): array {
+		if ( is_array( $result ) ) {
+			if ( isset( $result['integrations'] ) && is_array( $result['integrations'] ) ) {
+				return $result['integrations'];
+			}
+			if ( isset( $result['items'] ) && is_array( $result['items'] ) ) {
+				return $result['items'];
+			}
+
+			return $result;
+		}
+
+		if ( is_object( $result ) ) {
+			if ( method_exists( $result, 'getIntegrationId' ) ) {
+				return array( $result );
+			}
+
+			$data = null;
+			if ( method_exists( $result, 'getData' ) ) {
+				$data = $result->getData();
+			} elseif ( isset( $result->data ) ) {
+				$data = $result->data;
+			}
+
+			if ( is_string( $data ) && '' !== $data ) {
+				$decoded = json_decode( $data, true );
+				if ( is_array( $decoded ) ) {
+					$data = $decoded;
+				}
+			}
+
+			if ( is_object( $data ) ) {
+				$data = (array) $data;
+			}
+
+			if ( is_array( $data ) ) {
+				if ( isset( $data['integrations'] ) && is_array( $data['integrations'] ) ) {
+					return $data['integrations'];
+				}
+				if ( isset( $data['items'] ) && is_array( $data['items'] ) ) {
+					return $data['items'];
+				}
+			}
+
+			return array( $result );
+		}
+
+		return array();
+	}
+
+	private function get_username_for_user_id( int $user_id ): string {
+		$user = get_userdata( $user_id );
+		if ( ! $user || empty( $user->user_login ) ) {
+			return '';
+		}
+
+		return (string) $user->user_login;
+	}
+
+	private function hash_application_password( string $password ): string {
+		return hash( 'sha256', $password );
+	}
+
+	private function format_api_error_message( Throwable $error ): string {
+		$code = (int) $error->getCode();
+		$message = trim( wp_strip_all_tags( $error->getMessage() ) );
+		$message = preg_replace( '/\\s+/', ' ', $message );
+		$details = '';
+
+		if ( class_exists( 'MailMojo\\ApiException' ) && $error instanceof MailMojo\ApiException ) {
+			$response_body = $error->getResponseBody();
+			if ( is_string( $response_body ) && '' !== $response_body ) {
+				$details = $this->extract_api_error_details( $response_body );
+			} elseif ( is_object( $response_body ) || is_array( $response_body ) ) {
+				$details = $this->extract_api_error_details( wp_json_encode( $response_body ) );
+			}
+		}
+
+		if ( '' !== $details ) {
+			$message = trim( $message . ' ' . $details );
+		}
+
+		if ( '' === $message ) {
+			return sprintf( __( 'API error (%d).', 'mailmojo' ), $code );
+		}
+
+		if ( 0 !== $code ) {
+			return sprintf( __( 'API error (%d): %s', 'mailmojo' ), $code, $message );
+		}
+
+		return sprintf( __( 'API error: %s', 'mailmojo' ), $message );
+	}
+
+	private function store_last_api_error( string $message ): void {
+		update_option(
+			self::LAST_API_ERROR_OPTION,
+			array(
+				'message'    => $message,
+				'updated_at' => time(),
+			),
+			false
+		);
+	}
+
+	private function clear_last_api_error(): void {
+		delete_option( self::LAST_API_ERROR_OPTION );
+	}
+
+	private function get_last_api_error_notice(): ?string {
+		$last_error = get_option( self::LAST_API_ERROR_OPTION, array() );
+		if ( ! is_array( $last_error ) ) {
+			return null;
+		}
+
+		$message = isset( $last_error['message'] ) ? (string) $last_error['message'] : '';
+		$updated_at = isset( $last_error['updated_at'] ) ? (int) $last_error['updated_at'] : 0;
+
+		if ( '' === $message || 0 === $updated_at ) {
+			return null;
+		}
+
+		if ( time() - $updated_at > 15 * MINUTE_IN_SECONDS ) {
+			return null;
+		}
+
+		return $message;
+	}
+
+	private function extract_api_error_details( string $response_body ): string {
+		$decoded = json_decode( $response_body, true );
+		if ( is_array( $decoded ) ) {
+			$parts = array();
+			if ( isset( $decoded['detail'] ) ) {
+				$parts[] = $decoded['detail'];
+			}
+			if ( isset( $decoded['title'] ) ) {
+				$parts[] = $decoded['title'];
+			}
+			if ( isset( $decoded['message'] ) ) {
+				$parts[] = $decoded['message'];
+			}
+			if ( isset( $decoded['error'] ) ) {
+				$parts[] = $decoded['error'];
+			}
+			if ( isset( $decoded['errors'] ) && is_array( $decoded['errors'] ) ) {
+				$parts[] = wp_json_encode( $decoded['errors'] );
+			}
+
+			$parts = array_filter( array_map( 'strval', $parts ) );
+			if ( ! empty( $parts ) ) {
+				return $this->redact_sensitive_fields( implode( ' ', $parts ) );
+			}
+		}
+
+		return $this->redact_sensitive_fields( $response_body );
+	}
+
+	private function redact_sensitive_fields( string $message ): string {
+		$message = wp_strip_all_tags( $message );
+		$message = preg_replace( '/\\s+/', ' ', $message );
+		$message = preg_replace( '/\"token\"\\s*:\\s*\"[^\"]+\"/i', '\"token\":\"***\"', $message );
+		$message = preg_replace( '/\"username\"\\s*:\\s*\"[^\"]+\"/i', '\"username\":\"***\"', $message );
+		$message = preg_replace( '/\"site_url\"\\s*:\\s*\"[^\"]+\"/i', '\"site_url\":\"***\"', $message );
+		return trim( $message );
+	}
+
 	private function should_replace_token(): bool {
 		if ( empty( $_GET['mailmojo_replace_token'] ) ) {
 			return false;
@@ -665,11 +1089,19 @@ class Mailmojo_Admin {
 			),
 			'app_password_updated' => array(
 				'type'    => 'success',
-				'message' => __( 'Application password updated.', 'mailmojo' ),
+				'message' => __( 'Connection refreshed.', 'mailmojo' ),
+			),
+			'app_password_failed' => array(
+				'type'    => 'error',
+				'message' => __( 'Connection refresh failed. Please verify your Mailmojo token and try again.', 'mailmojo' ),
 			),
 			'sync_saved'         => array(
 				'type'    => 'success',
 				'message' => __( 'Content sync settings saved.', 'mailmojo' ),
+			),
+			'sync_needs_attention' => array(
+				'type'    => 'warning',
+				'message' => __( 'Content sync settings saved, but the connection needs attention.', 'mailmojo' ),
 			),
 		);
 

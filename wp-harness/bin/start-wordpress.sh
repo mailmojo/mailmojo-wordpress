@@ -7,6 +7,8 @@ RUNTIME_DIR="$HARNESS_DIR/runtime"
 WP_DIR="$HARNESS_DIR/wordpress"
 
 PORT="${WP_PORT:-8888}"
+HOST="${WP_HOST:-localhost}"
+URL="${WP_URL:-http://${HOST}:${PORT}}"
 PID_FILE="$RUNTIME_DIR/php-server.pid"
 LOG_FILE="$RUNTIME_DIR/php-server.log"
 
@@ -23,4 +25,4 @@ php -S 0.0.0.0:"$PORT" -t "$WP_DIR" >"$LOG_FILE" 2>&1 &
 
 echo $! > "$PID_FILE"
 
-echo "WordPress running at http://localhost:${PORT}"
+echo "WordPress running at ${URL}"
