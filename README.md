@@ -107,6 +107,34 @@ Developers do not use Subversion locally.
 
 -------------------------------------------------------------------------------
 
+## WordPress.org release automation
+
+This repo includes a GitHub Actions workflow:
+- `.github/workflows/deploy-wordpress-org.yml`
+
+It deploys to WordPress.org using the well-tested:
+- `10up/action-wordpress-plugin-deploy`
+
+### One-time setup (GitHub repository settings)
+
+Add these repository secrets:
+- `WP_ORG_SVN_USERNAME` (WordPress.org username with commit access to plugin slug)
+- `WP_ORG_SVN_PASSWORD` (WordPress.org application password)
+
+### Release process
+
+1. Update version in:
+- `mailmojo/mailmojo.php` (`Version:` header)
+- `mailmojo/readme.txt` (`Stable tag:`)
+2. Commit changes to `main`.
+3. Create and push a semantic tag with `v` prefix, for example:
+- `git tag v0.1.1`
+- `git push origin v0.1.1`
+
+The workflow validates that tag, plugin version, and stable tag all match before deploying.
+
+-------------------------------------------------------------------------------
+
 ## Security
 
 Please report security issues privately.
