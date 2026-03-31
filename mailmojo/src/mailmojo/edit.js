@@ -1,42 +1,136 @@
-/**
- * Retrieves the translation of text.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
- */
+import apiFetch from '@wordpress/api-fetch';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	Notice,
+	PanelBody,
+	SelectControl,
+	Spinner,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 
-/**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
- */
-import { useBlockProps } from '@wordpress/block-editor';
-
-/**
- * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
- * Those files can contain any CSS code that gets applied to the editor.
- *
- * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
- */
 import './editor.scss';
 
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @return {Element} Element to render.
- */
-export default function Edit() {
+const POPUPS_ENDPOINT = '/mailmojo/v1/popups';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const { popupId } = attributes;
+	const [ popups, setPopups ] = useState( [] );
+	const [ isLoading, setIsLoading ] = useState( false );
+	const [ errorMessage, setErrorMessage ] = useState( '' );
+
+	useEffect( () => {
+		let isMounted = true;
+
+		setIsLoading( true );
+		apiFetch( { path: POPUPS_ENDPOINT } )
+			.then( ( response ) => {
+				if ( ! isMounted ) {
+					return;
+				}
+
+				setPopups(
+					Array.isArray( response?.popups ) ? response.popups : []
+				);
+				setErrorMessage( '' );
+			} )
+			.catch( () => {
+				if ( ! isMounted ) {
+					return;
+				}
+
+				setPopups( [] );
+				setErrorMessage(
+					__(
+						'There was a problem retrieving popup forms from Mailmojo.',
+						'mailmojo'
+					)
+				);
+			} )
+			.finally( () => {
+				if ( isMounted ) {
+					setIsLoading( false );
+				}
+			} );
+
+		return () => {
+			isMounted = false;
+		};
+	}, [] );
+
+	const popupOptions = useMemo(
+		() => [
+			{
+				label: __( 'Select a popup…', 'mailmojo' ),
+				value: '',
+			},
+			...popups.map( ( popup ) => ( {
+				label: popup.name,
+				value: String( popup.id ),
+			} ) ),
+		],
+		[ popups ]
+	);
+
+	const onChangePopup = ( nextValue ) => {
+		if ( ! nextValue ) {
+			setAttributes( {
+				popupId: undefined,
+				popupUrl: '',
+			} );
+			return;
+		}
+
+		const nextPopup = popups.find(
+			( popup ) => String( popup.id ) === String( nextValue )
+		);
+		if ( ! nextPopup ) {
+			return;
+		}
+
+		setAttributes( {
+			popupId: nextPopup.id,
+			popupUrl: nextPopup.public_url,
+		} );
+	};
+
+	const blockProps = useBlockProps( {
+		className: 'mailmojo-popup-button wp-element-button',
+	} );
+
 	return (
-		<a
-			{ ...useBlockProps( { className: 'mailmojo-popup-button wp-element-button' } ) }
-			href="#"
-			onClick={ ( event ) => event.preventDefault() }
-		>
-			{ __( 'Subscribe to our newsletter', 'mailmojo' ) }
-		</a>
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Popup settings', 'mailmojo' ) }
+					initialOpen={ true }
+				>
+					{ isLoading ? <Spinner /> : null }
+					{ errorMessage ? (
+						<Notice status="warning" isDismissible={ false }>
+							{ errorMessage }
+						</Notice>
+					) : null }
+					<SelectControl
+						label={ __( 'Popup form', 'mailmojo' ) }
+						value={ popupId ? String( popupId ) : '' }
+						options={ popupOptions }
+						onChange={ onChangePopup }
+						disabled={ isLoading || 0 === popups.length }
+						help={
+							0 === popups.length && ! isLoading
+								? __(
+										'No published popup forms were found in Mailmojo.',
+										'mailmojo'
+								  )
+								: undefined
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<button { ...blockProps } type="button">
+				{ __( 'Subscribe to our newsletter', 'mailmojo' ) }
+			</button>
+		</>
 	);
 }

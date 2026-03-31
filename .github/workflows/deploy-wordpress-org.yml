@@ -66,10 +66,52 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --working-dir=mailmojo --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
+      - name: Stage release package
+        run: |
+          set -euo pipefail
+
+          ZIP_NAME="mailmojo-${GITHUB_REF_NAME#v}.zip"
+          echo "ZIP_NAME=${ZIP_NAME}" >> "$GITHUB_ENV"
+
+          rm -rf release
+          mkdir -p release/mailmojo
+
+          rsync -a \
+            --exclude 'node_modules/' \
+            --exclude 'src/' \
+            --exclude 'composer.json' \
+            --exclude 'composer.lock' \
+            --exclude 'package.json' \
+            --exclude 'package-lock.json' \
+            mailmojo/ release/mailmojo/
+
+          test -f release/mailmojo/mailmojo.php
+          test -d release/mailmojo/build
+          test -d release/mailmojo/includes
+          test -d release/mailmojo/assets
+          test -d release/mailmojo/vendor
+          test -f release/mailmojo/readme.txt
+
+      - name: Create release zip
+        run: |
+          set -euo pipefail
+
+          ZIP_NAME="mailmojo-${GITHUB_REF_NAME#v}.zip"
+          (cd release && zip -qr "../${ZIP_NAME}" mailmojo)
+
+          unzip -l "${ZIP_NAME}" | grep -E 'mailmojo/(mailmojo\.php|readme\.txt|build/|includes/|assets/|vendor/)' >/dev/null
+
+      - name: Upload release zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailmojo-${{ github.ref_name }}
+          path: ${{ env.ZIP_NAME }}
+          if-no-files-found: error
+
       - name: Deploy to WordPress.org
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
           SLUG: mailmojo
-          BUILD_DIR: mailmojo
+          BUILD_DIR: release/mailmojo
           SVN_USERNAME: ${{ secrets.WP_ORG_SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.WP_ORG_SVN_PASSWORD }}

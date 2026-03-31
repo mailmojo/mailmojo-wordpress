@@ -1,0 +1,57 @@
+.mailmojo-table th,
+.mailmojo-table td {
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.mailmojo-section {
+	margin-top: 28px;
+}
+
+.mailmojo-section:first-of-type {
+	margin-top: 0;
+}
+
+.mailmojo-actions .button + .button {
+	margin-left: 6px;
+}
+
+.mailmojo-features {
+	display: flex;
+	gap: 16px;
+	margin: 20px 0 24px;
+	flex-wrap: wrap;
+}
+
+.mailmojo-feature {
+	flex: 1;
+	min-width: 180px;
+	max-width: 260px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 16px 18px;
+	display: flex;
+	gap: 12px;
+	align-items: flex-start;
+}
+
+.mailmojo-feature .dashicons {
+	color: #2271b1;
+	font-size: 24px;
+	width: 24px;
+	height: 24px;
+	flex-shrink: 0;
+	margin-top: 1px;
+}
+
+.mailmojo-feature strong {
+	display: block;
+	margin-bottom: 2px;
+}
+
+.mailmojo-feature p {
+	margin: 0;
+	color: #646970;
+	font-size: 13px;
+}

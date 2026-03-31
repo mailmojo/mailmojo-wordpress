@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name:       Mailmojo
- * Description:       Official Mailmojo plugin for WordPress. Add signup forms, enable popups, and sync content from WordPress to Mailmojo.
- * Version:           0.1.0
- * Requires at least: 6.7
+ * Description:       Official Mailmojo plugin for WordPress. Add signup forms, choose Mailmojo popups, and sync content from WordPress to Mailmojo.
+ * Version:           1.0.0
+ * Requires at least: 5.8
  * Requires PHP:      8.2
  * Author:            Mailmojo
  * Author URI:        https://mailmojo.no
@@ -24,11 +24,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$admin_file = __DIR__ . '/includes/class-mailmojo-admin.php';
-if ( file_exists( $admin_file ) ) {
-	require_once $admin_file;
-	if ( class_exists( 'Mailmojo_Admin' ) ) {
-		Mailmojo_Admin::init();
+foreach ( array( 'class-mailmojo-api', 'class-mailmojo-sync', 'class-mailmojo-admin' ) as $class_file ) {
+	$file = __DIR__ . '/includes/' . $class_file . '.php';
+	if ( file_exists( $file ) ) {
+		require_once $file;
+	}
+}
+
+if ( class_exists( 'Mailmojo_Admin' ) ) {
+	Mailmojo_Admin::init();
+}
+
+/**
+ * Output the Mailmojo JS SDK snippet in the public page <head>.
+ */
+add_action( 'wp_head', 'mailmojo_output_sdk_snippet' );
+
+function mailmojo_output_sdk_snippet(): void {
+	$snippet = get_option( 'mailmojo_sdk_snippet', '' );
+	if ( is_string( $snippet ) && '' !== $snippet ) {
+		// Snippet is a full <script> tag sourced from the Mailmojo API — output as-is.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo "\n" . $snippet . "\n";
 	}
 }
 /**
