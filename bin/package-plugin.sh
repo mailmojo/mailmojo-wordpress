@@ -14,6 +14,7 @@ rm -rf release
 mkdir -p release/mailmojo
 
 rsync -a \
+  --exclude '.*' \
   --exclude 'node_modules/' \
   --exclude '/src/' \
   --exclude 'composer.json' \

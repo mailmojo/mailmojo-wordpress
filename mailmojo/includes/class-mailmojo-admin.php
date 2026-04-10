@@ -14,7 +14,7 @@ class Mailmojo_Admin {
 	private const ACCESS_TOKEN_OPTION      = 'mailmojo_access_token';
 	private const CONNECTION_STATUS_OPTION = 'mailmojo_connection_status';
 
-	private Mailmojo_Api  $api;
+	private Mailmojo_Api $api;
 	private Mailmojo_Sync $sync;
 
 	private function __construct() {
@@ -72,7 +72,7 @@ class Mailmojo_Admin {
 		);
 	}
 
-	public function rest_get_popups( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function rest_get_popups( WP_REST_Request $request ): WP_REST_Response|WP_Error { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- required by WP REST API callback signature.
 		$token = $this->get_access_token();
 		if ( '' === $token ) {
 			return new WP_Error(
@@ -114,26 +114,26 @@ class Mailmojo_Admin {
 			$this->api->clear_last_api_error();
 		}
 
-		$status          = $this->get_connection_status();
-		$sync_enabled    = $this->sync->is_content_sync_enabled();
-		$app_status      = $this->sync->get_application_password_status();
-		$replace_token   = $this->should_replace_token();
-		$notice          = $this->get_notice();
-		$masked_token    = $token ? str_repeat( '•', 8 ) : '';
-		$test_timestamp  = $status['tested_at'] ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $status['tested_at'] ) : '';
-		$status_label    = $this->get_status_label( $status['state'] );
-		$status_css      = $this->get_status_css_class( $status['state'] );
-		$status_icon     = $this->get_connection_status_icon_class( $status['state'] );
-		$app_status_css  = $this->get_app_status_css_class( $app_status['state'] );
-		$app_status_text = $this->get_app_status_label( $app_status['state'] );
-		$app_status_icon = $this->get_sync_status_icon_class( $app_status['state'] );
-		$sync_checked_at = $app_status['updated_at'] ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $app_status['updated_at'] ) : '';
-		$api_error_notice   = $this->api->get_last_api_error_notice();
-		$replace_url        = wp_nonce_url( admin_url( 'admin.php?page=mailmojo&mailmojo_replace_token=1' ), 'mailmojo_replace_token' );
-		$cancel_replace_url = admin_url( 'admin.php?page=mailmojo' );
-		$show_token_form    = ( ! $token ) || $replace_token;
+		$status              = $this->get_connection_status();
+		$sync_enabled        = $this->sync->is_content_sync_enabled();
+		$app_status          = $this->sync->get_application_password_status();
+		$replace_token       = $this->should_replace_token();
+		$notice              = $this->get_notice();
+		$masked_token        = $token ? str_repeat( '•', 8 ) : '';
+		$test_timestamp      = $status['tested_at'] ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $status['tested_at'] ) : '';
+		$status_label        = $this->get_status_label( $status['state'] );
+		$status_css          = $this->get_status_css_class( $status['state'] );
+		$status_icon         = $this->get_connection_status_icon_class( $status['state'] );
+		$app_status_css      = $this->get_app_status_css_class( $app_status['state'] );
+		$app_status_text     = $this->get_app_status_label( $app_status['state'] );
+		$app_status_icon     = $this->get_sync_status_icon_class( $app_status['state'] );
+		$sync_checked_at     = $app_status['updated_at'] ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $app_status['updated_at'] ) : '';
+		$api_error_notice    = $this->api->get_last_api_error_notice();
+		$replace_url         = wp_nonce_url( admin_url( 'admin.php?page=mailmojo&mailmojo_replace_token=1' ), 'mailmojo_replace_token' );
+		$cancel_replace_url  = admin_url( 'admin.php?page=mailmojo' );
+		$show_token_form     = ( ! $token ) || $replace_token;
 		$show_token_features = $token && ! $show_token_form;
-		$regenerate_url     = wp_nonce_url( admin_url( 'admin-post.php?action=mailmojo_regenerate_app_password' ), 'mailmojo_regenerate_app_password' );
+		$regenerate_url      = wp_nonce_url( admin_url( 'admin-post.php?action=mailmojo_regenerate_app_password' ), 'mailmojo_regenerate_app_password' );
 
 		?>
 		<div class="wrap">
@@ -214,7 +214,12 @@ class Mailmojo_Admin {
 								<span>— <?php echo esc_html( $status['message'] ); ?></span>
 							<?php endif; ?>
 							<?php if ( $test_timestamp ) : ?>
-								<span><?php echo esc_html( sprintf( __( 'Last tested: %s', 'mailmojo' ), $test_timestamp ) ); ?></span>
+								<span>
+								<?php
+								/* translators: %s: date and time of last connection test */
+								echo esc_html( sprintf( __( 'Last tested: %s', 'mailmojo' ), $test_timestamp ) );
+								?>
+								</span>
 							<?php endif; ?>
 						</td>
 					</tr>
@@ -298,7 +303,12 @@ class Mailmojo_Admin {
 											<span>— <?php echo esc_html( $app_status['message'] ); ?></span>
 										<?php endif; ?>
 										<?php if ( $sync_checked_at ) : ?>
-											<span><?php echo esc_html( sprintf( __( 'Last checked: %s', 'mailmojo' ), $sync_checked_at ) ); ?></span>
+											<span>
+											<?php
+											/* translators: %s: date and time of last sync check */
+											echo esc_html( sprintf( __( 'Last checked: %s', 'mailmojo' ), $sync_checked_at ) );
+											?>
+										</span>
 										<?php endif; ?>
 									</p>
 								</td>
@@ -544,10 +554,12 @@ class Mailmojo_Admin {
 	}
 
 	private function get_notice(): ?array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only notice key set exclusively by nonce-verified admin-post.php handlers via wp_safe_redirect().
 		if ( empty( $_GET['mailmojo_notice'] ) ) {
 			return null;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- same as above; value is sanitized immediately.
 		$notice = sanitize_key( wp_unslash( $_GET['mailmojo_notice'] ) );
 
 		$messages = array(

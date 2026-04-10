@@ -27,7 +27,7 @@ class Mailmojo_Api {
 	 */
 	public function test_connection( string $token ): void {
 		if ( ! class_exists( 'MailMojo\\Configuration' ) || ! class_exists( 'MailMojo\\Api\\ListApi' ) ) {
-			throw new RuntimeException( __( 'Mailmojo SDK is not available.', 'mailmojo' ) );
+			throw new RuntimeException( esc_html__( 'Mailmojo SDK is not available.', 'mailmojo' ) );
 		}
 
 		$lists_api = new MailMojo\Api\ListApi( $this->get_http_client(), $this->get_sdk_config( $token ) );
@@ -113,8 +113,8 @@ class Mailmojo_Api {
 			)
 		);
 
-		$body  = json_decode( (string) $response->getBody(), true );
-		$forms = $this->normalize_form_list( $body );
+		$body   = json_decode( (string) $response->getBody(), true );
+		$forms  = $this->normalize_form_list( $body );
 		$popups = array();
 
 		foreach ( $forms as $form ) {
@@ -136,9 +136,9 @@ class Mailmojo_Api {
 			}
 
 			$popups[] = array(
-				'id'          => $id,
-				'name'        => $name,
-				'public_url'  => $public_url,
+				'id'           => $id,
+				'name'         => $name,
+				'public_url'   => $public_url,
 				'published_at' => isset( $form['published_at'] ) ? (string) $form['published_at'] : '',
 			);
 		}
@@ -169,13 +169,16 @@ class Mailmojo_Api {
 		}
 
 		if ( '' === $message ) {
+			/* translators: %d: HTTP error code */
 			return sprintf( __( 'API error (%d).', 'mailmojo' ), $code );
 		}
 
 		if ( 0 !== $code ) {
-			return sprintf( __( 'API error (%d): %s', 'mailmojo' ), $code, $message );
+			/* translators: 1: HTTP error code, 2: error message */
+			return sprintf( __( 'API error (%1$d): %2$s', 'mailmojo' ), $code, $message );
 		}
 
+		/* translators: %s: error message */
 		return sprintf( __( 'API error: %s', 'mailmojo' ), $message );
 	}
 
@@ -268,7 +271,7 @@ class Mailmojo_Api {
 
 	private function get_account_api( string $token ): MailMojo\Api\AccountApi {
 		if ( ! class_exists( 'MailMojo\\Configuration' ) || ! class_exists( 'MailMojo\\Api\\AccountApi' ) ) {
-			throw new RuntimeException( __( 'Mailmojo SDK is incomplete.', 'mailmojo' ) );
+			throw new RuntimeException( esc_html__( 'Mailmojo SDK is incomplete.', 'mailmojo' ) );
 		}
 
 		return new MailMojo\Api\AccountApi( $this->get_http_client(), $this->get_sdk_config( $token ) );

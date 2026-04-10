@@ -252,9 +252,9 @@ class Mailmojo_Sync {
 	}
 
 	private function update_application_password_metadata( int $user_id, string $username, string $password ): void {
-		$app_password              = $this->get_application_password();
-		$app_password['user_id']   = $user_id;
-		$app_password['username']  = $username;
+		$app_password               = $this->get_application_password();
+		$app_password['user_id']    = $user_id;
+		$app_password['username']   = $username;
 		$app_password['token_hash'] = $this->hash_application_password( $password );
 
 		update_option( self::APP_PASSWORD_OPTION, $app_password, false );
@@ -343,7 +343,7 @@ class Mailmojo_Sync {
 			$remote_username === (string) $app_password['username']
 			&& '' !== $remote_token
 			&& $this->hash_application_password( $remote_token ) === (string) $app_password['token_hash']
-			&& $remote_site_url === site_url()
+			&& site_url() === $remote_site_url
 		);
 
 		if ( $matches ) {

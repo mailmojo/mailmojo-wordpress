@@ -8,8 +8,7 @@ Stable tag:        1.0.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Connect your WordPress site to Mailmojo, Norway's email marketing platform,
-and turn your content into newsletters with less effort.
+Connect WordPress to Mailmojo — Norway's email marketing platform — and turn your content into newsletters with less effort.
 
 == Description ==
 

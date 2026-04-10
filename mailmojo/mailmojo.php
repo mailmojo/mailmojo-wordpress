@@ -15,19 +15,19 @@
  */
 
 // Autoload dependencies installed via Composer.
-$autoload = __DIR__ . '/vendor/autoload.php';
-if ( file_exists( $autoload ) ) {
-	require_once $autoload;
+$mailmojo_autoload = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $mailmojo_autoload ) ) {
+	require_once $mailmojo_autoload;
 }
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-foreach ( array( 'class-mailmojo-api', 'class-mailmojo-sync', 'class-mailmojo-admin' ) as $class_file ) {
-	$file = __DIR__ . '/includes/' . $class_file . '.php';
-	if ( file_exists( $file ) ) {
-		require_once $file;
+foreach ( array( 'class-mailmojo-api', 'class-mailmojo-sync', 'class-mailmojo-admin' ) as $mailmojo_class_file ) {
+	$mailmojo_file = __DIR__ . '/includes/' . $mailmojo_class_file . '.php';
+	if ( file_exists( $mailmojo_file ) ) {
+		require_once $mailmojo_file;
 	}
 }
 
@@ -56,7 +56,7 @@ function mailmojo_output_sdk_snippet(): void {
  * @see https://make.wordpress.org/core/2025/03/13/more-efficient-block-type-registration-in-6-8/
  * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
  */
-function create_block_mailmojo_block_init() {
+function mailmojo_register_blocks() {
 	/**
 	 * Registers the block(s) metadata from the `blocks-manifest.php` and registers the block type(s)
 	 * based on the registered block metadata.
@@ -88,4 +88,4 @@ function create_block_mailmojo_block_init() {
 		register_block_type( __DIR__ . "/build/{$block_type}" );
 	}
 }
-add_action( 'init', 'create_block_mailmojo_block_init' );
+add_action( 'init', 'mailmojo_register_blocks' );

@@ -10,12 +10,12 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Delete WP Application Password before removing the option that stores its UUID.
-$app_password = get_option( 'mailmojo_application_password', array() );
-if ( is_array( $app_password ) && ! empty( $app_password['user_id'] ) && ! empty( $app_password['uuid'] ) ) {
-	$user_id = (int) $app_password['user_id'];
-	$uuid    = (string) $app_password['uuid'];
+$mailmojo_app_password = get_option( 'mailmojo_application_password', array() );
+if ( is_array( $mailmojo_app_password ) && ! empty( $mailmojo_app_password['user_id'] ) && ! empty( $mailmojo_app_password['uuid'] ) ) {
+	$mailmojo_user_id = (int) $mailmojo_app_password['user_id'];
+	$mailmojo_uuid    = (string) $mailmojo_app_password['uuid'];
 	if ( class_exists( 'WP_Application_Passwords' ) ) {
-		WP_Application_Passwords::delete_application_password( $user_id, $uuid );
+		WP_Application_Passwords::delete_application_password( $mailmojo_user_id, $mailmojo_uuid );
 	}
 }
 
