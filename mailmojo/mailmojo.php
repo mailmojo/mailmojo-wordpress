@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:       Mailmojo
- * Description:       Official Mailmojo plugin for WordPress. Add signup forms, choose Mailmojo popups, and sync content from WordPress to Mailmojo.
+ * Plugin Name:       Mailmojo for WordPress
+ * Description:       Display Mailmojo subscribe popups on your site, add popup button blocks, and sync your WordPress posts to Mailmojo for faster newsletter creation.
  * Version:           1.0.0
  * Requires at least: 5.8
  * Requires PHP:      8.2
