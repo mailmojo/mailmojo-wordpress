@@ -17,13 +17,32 @@ return array(
 			'popupId' => array(
 				'type' => 'number'
 			),
+			'buttonText' => array(
+				'type' => 'string',
+				'default' => 'Subscribe to our newsletter'
+			),
 			'popupUrl' => array(
 				'type' => 'string',
 				'default' => ''
 			)
 		),
 		'supports' => array(
-			'html' => false
+			'html' => false,
+			'color' => array(
+				'background' => true,
+				'text' => true
+			),
+			'spacing' => array(
+				'margin' => true,
+				'padding' => true
+			),
+			'border' => array(
+				'radius' => true
+			),
+			'typography' => array(
+				'fontSize' => true,
+				'lineHeight' => true
+			)
 		),
 		'textdomain' => 'mailmojo',
 		'editorScript' => 'file:./index.js',

@@ -1,8 +1,7 @@
-import { useBlockProps } from '@wordpress/block-editor';
-import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
 
 export default function save( { attributes } ) {
-	const { popupUrl } = attributes;
+	const { popupUrl, buttonText } = attributes;
 
 	return (
 		<a
@@ -11,7 +10,7 @@ export default function save( { attributes } ) {
 			} ) }
 			href={ popupUrl || '#' }
 		>
-			{ __( 'Subscribe to our newsletter', 'mailmojo' ) }
+			<RichText.Content tagName="span" value={ buttonText } />
 		</a>
 	);
 }

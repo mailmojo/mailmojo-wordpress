@@ -1,5 +1,9 @@
 import apiFetch from '@wordpress/api-fetch';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	RichText,
+	useBlockProps,
+	InspectorControls,
+} from '@wordpress/block-editor';
 import {
 	Notice,
 	PanelBody,
@@ -14,7 +18,7 @@ import './editor.scss';
 const POPUPS_ENDPOINT = '/mailmojo/v1/popups';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { popupId } = attributes;
+	const { popupId, buttonText } = attributes;
 	const [ popups, setPopups ] = useState( [] );
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ errorMessage, setErrorMessage ] = useState( '' );
@@ -129,7 +133,15 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 			</InspectorControls>
 			<button { ...blockProps } type="button">
-				{ __( 'Subscribe to our newsletter', 'mailmojo' ) }
+				<RichText
+					tagName="span"
+					value={ buttonText }
+					onChange={ ( nextValue ) =>
+						setAttributes( { buttonText: nextValue } )
+					}
+					placeholder={ __( 'Add button text…', 'mailmojo' ) }
+					allowedFormats={ [] }
+				/>
 			</button>
 		</>
 	);

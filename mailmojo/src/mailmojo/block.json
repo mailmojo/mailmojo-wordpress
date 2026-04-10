@@ -12,13 +12,32 @@
 		"popupId": {
 			"type": "number"
 		},
+		"buttonText": {
+			"type": "string",
+			"default": "Subscribe to our newsletter"
+		},
 		"popupUrl": {
 			"type": "string",
 			"default": ""
 		}
 	},
 	"supports": {
-		"html": false
+		"html": false,
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"border": {
+			"radius": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		}
 	},
 	"textdomain": "mailmojo",
 	"editorScript": "file:./index.js",
