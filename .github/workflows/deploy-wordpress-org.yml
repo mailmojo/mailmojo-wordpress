@@ -77,9 +77,9 @@ jobs:
           mkdir -p release/mailmojo
 
           rsync -a \
+            --exclude '.*' \
             --exclude 'node_modules/' \
             --exclude 'src/' \
-            --exclude 'composer.json' \
             --exclude 'composer.lock' \
             --exclude 'package.json' \
             --exclude 'package-lock.json' \
@@ -113,5 +113,6 @@ jobs:
         env:
           SLUG: mailmojo
           BUILD_DIR: release/mailmojo
+          ASSETS_DIR: wp-assets
           SVN_USERNAME: ${{ secrets.WP_ORG_SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.WP_ORG_SVN_PASSWORD }}
