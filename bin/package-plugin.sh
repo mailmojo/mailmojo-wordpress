@@ -10,6 +10,7 @@ composer install --working-dir=mailmojo --no-dev --prefer-dist --no-interaction 
 npm run build --prefix mailmojo
 
 mkdir -p dist
+rm -f "${ZIP_NAME}"
 rm -rf release
 mkdir -p release/mailmojo
 
@@ -17,7 +18,6 @@ rsync -a \
   --exclude '.*' \
   --exclude 'node_modules/' \
   --exclude '/src/' \
-  --exclude 'composer.json' \
   --exclude 'composer.lock' \
   --exclude 'package.json' \
   --exclude 'package-lock.json' \

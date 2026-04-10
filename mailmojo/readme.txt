@@ -95,6 +95,21 @@ The script is only loaded on public-facing pages, not in the WordPress admin.
 2. Popup Button block in the block editor.
 3. Example of a Mailmojo subscribe popup shown on a site.
 
+== External Services ==
+
+This plugin connects to the Mailmojo API (api.mailmojo.no) to:
+
+* Verify your API token when you save or test the connection.
+* Fetch your account's JS snippet, which loads subscribe popup forms on your site.
+* Retrieve your published popup forms for use with the Popup Button block.
+* Push your WordPress integration settings (site URL, username, and application password token) to Mailmojo when content sync is enabled.
+
+No data is transmitted until you save an API token. Content sync credentials (site URL, WordPress username, and an application password) are only sent when you explicitly enable content sync.
+
+Service provider: Mailmojo AS, Norway.
+Privacy policy: https://mailmojo.no/personvern
+Terms of service: https://v3.mailmojo.no/legal/terms_of_service/1.0/
+
 == Changelog ==
 
 = 1.0.0 =
