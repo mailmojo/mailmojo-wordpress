@@ -17,6 +17,7 @@ composer.lock
 # NOTE: For WP.org you typically DO commit /build in the plugin folder,
 # but keep root-level build noise ignored.
 dist/
+release/
 .tmp/
 .cache/
 

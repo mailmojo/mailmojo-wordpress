@@ -4,6 +4,7 @@
   "scripts": {
     "wp:start": "./wp-harness/bin/start-wordpress.sh",
     "wp:stop": "./wp-harness/bin/stop-wordpress.sh",
-    "wp:reset": "./wp-harness/bin/reset-wordpress.sh"
+    "wp:reset": "./wp-harness/bin/reset-wordpress.sh",
+    "plugin:package": "./bin/package-plugin.sh"
   }
 }
