@@ -35,6 +35,12 @@ if ( class_exists( 'Mailmojo_Admin' ) ) {
 	Mailmojo_Admin::init();
 }
 
+add_action( 'init', 'mailmojo_load_textdomain' );
+
+function mailmojo_load_textdomain(): void {
+	load_plugin_textdomain( 'mailmojo', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}
+
 /**
  * Output the Mailmojo JS SDK snippet in the public page <head>.
  */
@@ -66,6 +72,7 @@ function mailmojo_register_blocks() {
 	 */
 	if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) ) {
 		wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
+		wp_set_script_translations( 'mailmojo-mailmojo-popup-button-editor-script', 'mailmojo', __DIR__ . '/languages' );
 		return;
 	}
 
@@ -86,6 +93,7 @@ function mailmojo_register_blocks() {
 	$manifest_data = require __DIR__ . '/build/blocks-manifest.php';
 	foreach ( array_keys( $manifest_data ) as $block_type ) {
 		register_block_type( __DIR__ . "/build/{$block_type}" );
+		wp_set_script_translations( 'mailmojo-mailmojo-popup-button-editor-script', 'mailmojo', __DIR__ . '/languages' );
 	}
 }
 add_action( 'init', 'mailmojo_register_blocks' );

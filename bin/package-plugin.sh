@@ -21,6 +21,16 @@ rsync -a \
   --exclude 'composer.lock' \
   --exclude 'package.json' \
   --exclude 'package-lock.json' \
+  --exclude 'phpcs.xml' \
+  --exclude 'test/' \
+  --exclude 'tests/' \
+  --exclude 'Test/' \
+  --exclude 'Tests/' \
+  --exclude 'docs/' \
+  --exclude '*.md' \
+  --exclude '*.sh' \
+  --exclude 'Dockerfile' \
+  --exclude '*.dist' \
   mailmojo/ release/mailmojo/
 
 (cd release && zip -qr "$(pwd)/../${ZIP_NAME}" mailmojo)

@@ -1,0 +1,434 @@
+# Danish translation for Mailmojo.
+# Copyright (C) 2026 Mailmojo AS
+# This file is distributed under the same license as the Mailmojo package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Mailmojo 1.0.0\n"
+"Report-Msgid-Bugs-To: support@mailmojo.no\n"
+"POT-Creation-Date: 2026-04-11T11:12:45+00:00\n"
+"PO-Revision-Date: 2026-04-11 00:00+0200\n"
+"Last-Translator: Mailmojo AS <support@mailmojo.no>\n"
+"Language-Team: Danish\n"
+"Language: da_DK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Plugin Name of the plugin
+#: mailmojo.php:3
+msgid "Mailmojo for WordPress"
+msgstr ""
+
+#. Description of the plugin
+#: mailmojo.php:4
+msgid ""
+"Display Mailmojo subscribe popups on your site, add popup button blocks, and "
+"sync your WordPress posts to Mailmojo for faster newsletter creation."
+msgstr ""
+
+#. Author of the plugin
+#: mailmojo.php:8 includes/class-mailmojo-admin.php:39
+#: includes/class-mailmojo-admin.php:40
+msgid "Mailmojo"
+msgstr "Mailmojo"
+
+#. Author URI of the plugin
+#: mailmojo.php:9
+msgid "https://mailmojo.no"
+msgstr ""
+
+#: includes/class-mailmojo-admin.php:80
+msgid "Mailmojo access token is not configured."
+msgstr "Mailmojo API-nøgle er ikke konfigureret."
+
+#: includes/class-mailmojo-admin.php:95 src/mailmojo/edit.js:48
+msgid "There was a problem retrieving popup forms from Mailmojo."
+msgstr "Der opstod et problem ved hentning af popup-formularer fra Mailmojo."
+
+#: includes/class-mailmojo-admin.php:103
+msgid "You do not have permission to access this page."
+msgstr "Du har ikke tilladelse til at åbne denne side."
+
+#: includes/class-mailmojo-admin.php:164
+msgid ""
+"The easiest way to add Mailmojo subscribe forms to your WordPress site — and "
+"when you're ready, sync your posts directly into your newsletter editor so "
+"building campaigns takes minutes, not hours."
+msgstr ""
+"Den nemmeste måde at tilføje Mailmojo-tilmeldingsformularer til dit "
+"WordPress-websted — og når du er klar, synkroniser dine indlæg direkte til "
+"nyhedsbrevseditoren, så kampagner tager minutter, ikke timer."
+
+#: includes/class-mailmojo-admin.php:170
+msgid "Collect subscribers"
+msgstr "Saml abonnenter"
+
+#: includes/class-mailmojo-admin.php:171
+msgid "Embed signup forms and popups anywhere on your site."
+msgstr "Integrer tilmeldingsformularer og popups overalt på dit websted."
+
+#: includes/class-mailmojo-admin.php:177
+msgid "Sync content automatically"
+msgstr "Synkroniser indhold automatisk"
+
+#: includes/class-mailmojo-admin.php:178
+msgid "Posts and pages are sent to Mailmojo as you publish."
+msgstr "Indlæg og sider sendes til Mailmojo, når du publicerer."
+
+#: includes/class-mailmojo-admin.php:184
+msgid "Send better campaigns"
+msgstr "Send bedre kampagner"
+
+#: includes/class-mailmojo-admin.php:185
+msgid "Reuse your WordPress content in email newsletters effortlessly."
+msgstr "Genbrug dit WordPress-indhold i e-nyhedsbreve uden besvær."
+
+#: includes/class-mailmojo-admin.php:190
+msgid "Connect your Mailmojo account"
+msgstr "Tilslut din Mailmojo-konto"
+
+#. translators: %s is a link to the Mailmojo WordPress integration page
+#: includes/class-mailmojo-admin.php:195
+#, php-format
+msgid "Find your API token on the %s page in your Mailmojo account."
+msgstr "Find din API-nøgle på %s-siden i din Mailmojo-konto."
+
+#: includes/class-mailmojo-admin.php:196
+msgid "WordPress integration"
+msgstr "WordPress-integration"
+
+#: includes/class-mailmojo-admin.php:203
+msgid "Saved token"
+msgstr "Gemt nøgle"
+
+#: includes/class-mailmojo-admin.php:207 includes/class-mailmojo-admin.php:295
+msgid "Status"
+msgstr "Status"
+
+#. translators: %s: date and time of last connection test
+#: includes/class-mailmojo-admin.php:220
+#, php-format
+msgid "Last tested: %s"
+msgstr "Sidst testet: %s"
+
+#: includes/class-mailmojo-admin.php:229
+msgid "Replace token"
+msgstr "Skift nøgle"
+
+#: includes/class-mailmojo-admin.php:241
+msgid "Access token"
+msgstr "API-nøgle"
+
+#: includes/class-mailmojo-admin.php:250
+msgid "Paste your Mailmojo API token"
+msgstr "Indsæt din Mailmojo API-nøgle"
+
+#: includes/class-mailmojo-admin.php:258
+msgid "Save token"
+msgstr "Gem nøgle"
+
+#: includes/class-mailmojo-admin.php:262
+msgid "Keep existing token"
+msgstr "Behold eksisterende nøgle"
+
+#: includes/class-mailmojo-admin.php:270
+msgid "Sync content to your newsletters"
+msgstr "Synkroniser indhold til dine nyhedsbreve"
+
+#: includes/class-mailmojo-admin.php:272
+msgid ""
+"When enabled, your WordPress posts and pages become available as drag-and-"
+"drop content blocks inside the Mailmojo newsletter editor — so you can build "
+"a campaign in minutes instead of copy-pasting from your site."
+msgstr ""
+"Når aktiveret bliver dine WordPress-indlæg og sider tilgængelige som træk-"
+"og-slip-indholdsblokke i Mailmojo-nyhedsbrevseditoren — så kan du opbygge en "
+"kampagne på minutter i stedet for at kopiere og indsætte fra dit websted."
+
+#: includes/class-mailmojo-admin.php:279
+msgid "Content sync"
+msgstr "Indholdssynkronisering"
+
+#: includes/class-mailmojo-admin.php:289
+msgid "Enable content sync"
+msgstr "Aktiver indholdssynkronisering"
+
+#. translators: %s: date and time of last sync check
+#: includes/class-mailmojo-admin.php:309
+#, php-format
+msgid "Last checked: %s"
+msgstr "Sidst kontrolleret: %s"
+
+#: includes/class-mailmojo-admin.php:320
+msgid "Save sync settings"
+msgstr "Gem synkroniseringsindstillinger"
+
+#: includes/class-mailmojo-admin.php:324
+msgid "Refresh connection"
+msgstr "Opdater forbindelse"
+
+#: includes/class-mailmojo-admin.php:332 includes/class-mailmojo-admin.php:337
+msgid "Test connection"
+msgstr "Test forbindelse"
+
+#: includes/class-mailmojo-admin.php:333
+msgid "Verify that the saved token can connect to Mailmojo."
+msgstr "Kontroller at den gemte nøgle kan oprette forbindelse til Mailmojo."
+
+#: includes/class-mailmojo-admin.php:342
+msgid "Reset"
+msgstr "Nulstil"
+
+#: includes/class-mailmojo-admin.php:343
+msgid ""
+"Remove the saved token and all plugin data. This lets you start the "
+"onboarding over from scratch."
+msgstr ""
+"Fjern den gemte nøgle og alle plugin-data. Dette lader dig starte "
+"opsætningsprocessen forfra."
+
+#: includes/class-mailmojo-admin.php:347
+msgid "Reset plugin data"
+msgstr "Nulstil plugin-data"
+
+#: includes/class-mailmojo-admin.php:356 includes/class-mailmojo-admin.php:385
+#: includes/class-mailmojo-admin.php:415 includes/class-mailmojo-admin.php:448
+#: includes/class-mailmojo-admin.php:465
+msgid "You do not have permission to perform this action."
+msgstr "Du har ikke tilladelse til at udføre denne handling."
+
+#: includes/class-mailmojo-admin.php:372 includes/class-mailmojo-admin.php:433
+#: includes/class-mailmojo-admin.php:572
+msgid "Connection successful."
+msgstr "Forbindelse lykkedes."
+
+#: includes/class-mailmojo-admin.php:407
+msgid "Content sync is disabled."
+msgstr "Indholdssynkronisering er deaktiveret."
+
+#: includes/class-mailmojo-admin.php:423
+msgid "No token saved."
+msgstr "Ingen nøgle gemt."
+
+#: includes/class-mailmojo-admin.php:425
+msgid "Mailmojo token is missing."
+msgstr "Mailmojo API-nøgle mangler."
+
+#: includes/class-mailmojo-admin.php:440
+msgid "Mailmojo token could not be verified."
+msgstr "Mailmojo API-nøgle kunne ikke verificeres."
+
+#: includes/class-mailmojo-admin.php:483
+msgid "Unexpected error while testing connection."
+msgstr "Uventet fejl ved test af forbindelse."
+
+#: includes/class-mailmojo-admin.php:487
+msgid "Network error. Please try again."
+msgstr "Netværksfejl. Prøv igen."
+
+#: includes/class-mailmojo-admin.php:489
+msgid "Unauthorized. Please check the token."
+msgstr "Ikke autoriseret. Kontroller nøglen."
+
+#: includes/class-mailmojo-admin.php:491
+msgid "Mailmojo API returned an error."
+msgstr "Mailmojo API returnerede en fejl."
+
+#: includes/class-mailmojo-admin.php:568
+msgid "Please enter a Mailmojo access token."
+msgstr "Indtast en Mailmojo API-nøgle."
+
+#: includes/class-mailmojo-admin.php:576
+msgid "Connection failed. Review the status message for details."
+msgstr "Forbindelsen mislykkedes. Se statusmeddelelsen for detaljer."
+
+#: includes/class-mailmojo-admin.php:580
+msgid "Connection refreshed."
+msgstr "Forbindelse opdateret."
+
+#: includes/class-mailmojo-admin.php:584
+msgid ""
+"Connection refresh failed. Please verify your Mailmojo token and try again."
+msgstr ""
+"Opdatering af forbindelse mislykkedes. Kontroller Mailmojo API-nøglen og "
+"prøv igen."
+
+#: includes/class-mailmojo-admin.php:588
+msgid "Content sync settings saved."
+msgstr "Indstillinger for indholdssynkronisering er gemt."
+
+#: includes/class-mailmojo-admin.php:592
+msgid "Content sync settings saved, but the connection needs attention."
+msgstr ""
+"Indstillinger for indholdssynkronisering er gemt, men forbindelsen kræver "
+"opmærksomhed."
+
+#: includes/class-mailmojo-admin.php:596
+msgid "Plugin data has been reset."
+msgstr "Plugin-data er blevet nulstillet."
+
+#: includes/class-mailmojo-admin.php:606
+msgid "Connected"
+msgstr "Forbundet"
+
+#: includes/class-mailmojo-admin.php:608
+msgid "Not connected"
+msgstr "Ikke forbundet"
+
+#: includes/class-mailmojo-admin.php:610
+msgid "Not tested"
+msgstr "Ikke testet"
+
+#: includes/class-mailmojo-admin.php:639
+msgid "Up to date"
+msgstr "Opdateret"
+
+#: includes/class-mailmojo-admin.php:641
+msgid "Ready to update"
+msgstr "Klar til opdatering"
+
+#: includes/class-mailmojo-admin.php:643
+msgid "Refresh needed"
+msgstr "Opdatering nødvendig"
+
+#: includes/class-mailmojo-admin.php:645
+msgid "Not available"
+msgstr "Ikke tilgængelig"
+
+#: includes/class-mailmojo-admin.php:647
+msgid "Action required"
+msgstr "Handling påkrævet"
+
+#: includes/class-mailmojo-admin.php:649
+msgid "Not created"
+msgstr "Ikke oprettet"
+
+#: includes/class-mailmojo-api.php:30
+msgid "Mailmojo SDK is not available."
+msgstr "Mailmojo SDK er ikke tilgængelig."
+
+#: includes/class-mailmojo-api.php:65
+msgid "Mailmojo did not return an SDK snippet for this account."
+msgstr "Mailmojo returnerede ikke et SDK-fragment for denne konto."
+
+#: includes/class-mailmojo-api.php:68
+msgid ""
+"Mailmojo SDK snippet could not be loaded. Please verify the connection and "
+"try again."
+msgstr ""
+"Mailmojo SDK-fragment kunne ikke indlæses. Kontroller forbindelsen og prøv "
+"igen."
+
+#. translators: %d: HTTP error code
+#: includes/class-mailmojo-api.php:173
+#, php-format
+msgid "API error (%d)."
+msgstr "API-fejl (%d)."
+
+#. translators: 1: HTTP error code, 2: error message
+#: includes/class-mailmojo-api.php:178
+#, php-format
+msgid "API error (%1$d): %2$s"
+msgstr "API-fejl (%1$d): %2$s"
+
+#. translators: %s: error message
+#: includes/class-mailmojo-api.php:182
+#, php-format
+msgid "API error: %s"
+msgstr "API-fejl: %s"
+
+#: includes/class-mailmojo-api.php:274
+msgid "Mailmojo SDK is incomplete."
+msgstr "Mailmojo SDK er ufuldstændig."
+
+#: includes/class-mailmojo-sync.php:42
+msgid "Sync connection is not available on this WordPress version."
+msgstr "Synkroniseringsforbindelse er ikke tilgængelig på denne WordPress-version."
+
+#: includes/class-mailmojo-sync.php:52
+msgid "Unable to determine a user for the sync connection."
+msgstr "Kan ikke fastslå en bruger for synkroniseringsforbindelsen."
+
+#: includes/class-mailmojo-sync.php:75
+msgid "Unable to create sync connection."
+msgstr "Kan ikke oprette synkroniseringsforbindelse."
+
+#: includes/class-mailmojo-sync.php:80 includes/class-mailmojo-sync.php:87
+#: includes/class-mailmojo-sync.php:92
+msgid "Sync connection setup failed."
+msgstr "Opsætning af synkroniseringsforbindelse mislykkedes."
+
+#: includes/class-mailmojo-sync.php:113
+msgid "Sync connection has not been created yet."
+msgstr "Synkroniseringsforbindelse er endnu ikke oprettet."
+
+#: includes/class-mailmojo-sync.php:119 includes/class-mailmojo-sync.php:281
+msgid "Unable to determine sync connection user."
+msgstr "Kan ikke fastslå bruger for synkroniseringsforbindelse."
+
+#: includes/class-mailmojo-sync.php:271 includes/class-mailmojo-sync.php:312
+msgid "Sync connection needs to be refreshed."
+msgstr "Synkroniseringsforbindelse skal opdateres."
+
+#: includes/class-mailmojo-sync.php:275
+msgid "Sync connection is ready to update in Mailmojo."
+msgstr "Synkroniseringsforbindelse er klar til at blive opdateret i Mailmojo."
+
+#: includes/class-mailmojo-sync.php:295 includes/class-mailmojo-sync.php:351
+msgid "Mailmojo has the latest sync connection."
+msgstr "Mailmojo har den nyeste synkroniseringsforbindelse."
+
+#. translators: %s is an API error summary.
+#: includes/class-mailmojo-sync.php:303
+#, php-format
+msgid "Unable to update Mailmojo sync connection. %s"
+msgstr "Kan ikke opdatere Mailmojo-synkroniseringsforbindelse. %s"
+
+#. translators: %s is an API error summary.
+#: includes/class-mailmojo-sync.php:325
+#, php-format
+msgid "Unable to verify sync connection with Mailmojo. %s"
+msgstr "Kan ikke verificere synkroniseringsforbindelse med Mailmojo. %s"
+
+#: includes/class-mailmojo-sync.php:334
+msgid "Sync connection has not been stored in Mailmojo yet."
+msgstr "Synkroniseringsforbindelse er endnu ikke gemt i Mailmojo."
+
+#: includes/class-mailmojo-sync.php:355
+msgid "Mailmojo has different sync connection settings."
+msgstr "Mailmojo har andre indstillinger for synkroniseringsforbindelse."
+
+#: src/mailmojo/edit.js:68
+msgid "Select a popup…"
+msgstr "Vælg en popup…"
+
+#: src/mailmojo/edit.js:109
+msgid "Popup settings"
+msgstr "Popup-indstillinger"
+
+#: src/mailmojo/edit.js:119
+msgid "Popup form"
+msgstr "Popup-formular"
+
+#: src/mailmojo/edit.js:126
+msgid "No published popup forms were found in Mailmojo."
+msgstr "Ingen publicerede popup-formularer blev fundet i Mailmojo."
+
+#: src/mailmojo/edit.js:142
+msgid "Add button text…"
+msgstr "Tilføj knaptekst…"
+
+#: src/mailmojo/block.json
+msgctxt "block title"
+msgid "Mailmojo Popup Button"
+msgstr "Mailmojo popup-knap"
+
+#: src/mailmojo/block.json
+msgctxt "block description"
+msgid ""
+"Button that opens a specific Mailmojo subscribe popup selected when "
+"inserting the block."
+msgstr ""
+"Knap der åbner et bestemt Mailmojo-popup valgt ved indsætning af blokken."
