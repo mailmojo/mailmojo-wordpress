@@ -9,6 +9,9 @@ echo "Packaging plugin v${VERSION}..."
 composer install --working-dir=mailmojo --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 npm run build --prefix mailmojo
 
+# Restore dev dependencies so local tooling (phpcs, wp-cli) still works after packaging
+composer install --working-dir=mailmojo --prefer-dist --no-interaction --no-progress
+
 mkdir -p dist
 rm -f "${ZIP_NAME}"
 rm -rf release
