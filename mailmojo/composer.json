@@ -8,7 +8,7 @@
         }
     ],
     "require": {
-        "eliksir/mailmojo-php-sdk": "^0.7.0"
+        "eliksir/mailmojo-php-sdk": "^0.8.0"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "*",

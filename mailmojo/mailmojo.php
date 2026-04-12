@@ -49,9 +49,16 @@ add_action( 'wp_head', 'mailmojo_output_sdk_snippet' );
 function mailmojo_output_sdk_snippet(): void {
 	$snippet = get_option( 'mailmojo_sdk_snippet', '' );
 	if ( is_string( $snippet ) && '' !== $snippet ) {
-		// Snippet is a full <script> tag sourced from the Mailmojo API — output as-is.
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo "\n" . $snippet . "\n";
+		$allowed_html = array(
+			'script' => array(
+				'src'   => true,
+				'type'  => true,
+				'async' => true,
+				'defer' => true,
+				'id'    => true,
+			),
+		);
+		echo "\n" . wp_kses( $snippet, $allowed_html ) . "\n";
 	}
 }
 /**

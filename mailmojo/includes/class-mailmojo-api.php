@@ -42,19 +42,8 @@ class Mailmojo_Api {
 	 */
 	public function fetch_sdk_snippet( string $token ): bool {
 		try {
-			$response = $this->get_http_client()->request(
-				'GET',
-				rtrim( $this->get_api_host(), '/' ) . '/v1/accounts/sdk/',
-				array(
-					'headers' => array(
-						'Authorization' => 'Bearer ' . $token,
-						'Accept'        => 'application/json',
-					),
-				)
-			);
-
-			$body    = json_decode( (string) $response->getBody(), true );
-			$snippet = is_array( $body ) && isset( $body['sdk_snippet'] ) ? (string) $body['sdk_snippet'] : '';
+			$sdk_details = $this->get_account_api( $token )->getAccountSdkDetails();
+			$snippet     = $sdk_details instanceof \MailMojo\Model\AccountSdkDetails ? $sdk_details->getSdkSnippet() : '';
 
 			if ( '' !== $snippet ) {
 				update_option( self::SDK_SNIPPET_OPTION, $snippet, false );

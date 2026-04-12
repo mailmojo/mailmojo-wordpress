@@ -530,7 +530,7 @@ class Mailmojo_Admin {
 	}
 
 	private function should_replace_token(): bool {
-		if ( empty( $_GET['mailmojo_replace_token'] ) ) {
+		if ( empty( sanitize_text_field( wp_unslash( $_GET['mailmojo_replace_token'] ?? '' ) ) ) ) {
 			return false;
 		}
 
