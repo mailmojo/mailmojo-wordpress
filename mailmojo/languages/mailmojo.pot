@@ -50,7 +50,7 @@ msgid "You do not have permission to access this page."
 msgstr ""
 
 #: includes/class-mailmojo-admin.php:164
-msgid "The easiest way to add Mailmojo subscribe forms to your WordPress site — and when you're ready, sync your posts directly into your newsletter editor so building campaigns takes minutes, not hours."
+msgid "The easiest way to add Mailmojo subscribe forms to your WordPress site. When you're ready, sync your posts directly into your newsletter editor so building campaigns takes minutes, not hours."
 msgstr ""
 
 #: includes/class-mailmojo-admin.php:170
@@ -131,7 +131,7 @@ msgid "Sync content to your newsletters"
 msgstr ""
 
 #: includes/class-mailmojo-admin.php:272
-msgid "When enabled, your WordPress posts and pages become available as drag-and-drop content blocks inside the Mailmojo newsletter editor — so you can build a campaign in minutes instead of copy-pasting from your site."
+msgid "When enabled, your WordPress posts and pages become available as drag-and-drop content blocks inside the Mailmojo newsletter editor, so you can build a campaign in minutes instead of copy-pasting from your site."
 msgstr ""
 
 #: includes/class-mailmojo-admin.php:279

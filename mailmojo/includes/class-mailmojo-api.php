@@ -53,7 +53,7 @@ class Mailmojo_Api {
 
 			$this->store_last_api_error( __( 'Mailmojo did not return an SDK snippet for this account.', 'mailmojo' ) );
 		} catch ( Throwable $e ) {
-			// Non-fatal — the rest of the save flow continues even if this fails.
+			// Non-fatal; the rest of the save flow continues even if this fails.
 			$this->store_last_api_error( __( 'Mailmojo SDK snippet could not be loaded. Please verify the connection and try again.', 'mailmojo' ) );
 		}
 

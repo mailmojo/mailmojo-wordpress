@@ -53,12 +53,12 @@ msgstr "Du har ikke tilladelse til at åbne denne side."
 
 #: includes/class-mailmojo-admin.php:164
 msgid ""
-"The easiest way to add Mailmojo subscribe forms to your WordPress site — and "
-"when you're ready, sync your posts directly into your newsletter editor so "
+"The easiest way to add Mailmojo subscribe forms to your WordPress site. When "
+"you're ready, sync your posts directly into your newsletter editor so "
 "building campaigns takes minutes, not hours."
 msgstr ""
 "Den nemmeste måde at tilføje Mailmojo-tilmeldingsformularer til dit "
-"WordPress-websted — og når du er klar, synkroniser dine indlæg direkte til "
+"WordPress-websted. Når du er klar, synkroniser dine indlæg direkte til "
 "nyhedsbrevseditoren, så kampagner tager minutter, ikke timer."
 
 #: includes/class-mailmojo-admin.php:170
@@ -140,11 +140,11 @@ msgstr "Synkroniser indhold til dine nyhedsbreve"
 #: includes/class-mailmojo-admin.php:272
 msgid ""
 "When enabled, your WordPress posts and pages become available as drag-and-"
-"drop content blocks inside the Mailmojo newsletter editor — so you can build "
+"drop content blocks inside the Mailmojo newsletter editor, so you can build "
 "a campaign in minutes instead of copy-pasting from your site."
 msgstr ""
 "Når aktiveret bliver dine WordPress-indlæg og sider tilgængelige som træk-"
-"og-slip-indholdsblokke i Mailmojo-nyhedsbrevseditoren — så kan du opbygge en "
+"og-slip-indholdsblokke i Mailmojo-nyhedsbrevseditoren, så kan du opbygge en "
 "kampagne på minutter i stedet for at kopiere og indsætte fra dit websted."
 
 #: includes/class-mailmojo-admin.php:279

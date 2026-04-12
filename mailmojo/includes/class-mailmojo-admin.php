@@ -161,7 +161,7 @@ class Mailmojo_Admin {
 				</div>
 			<?php endif; ?>
 
-			<p style="max-width: 600px; font-size: 15px; line-height: 1.6;"><?php esc_html_e( 'The easiest way to add Mailmojo subscribe forms to your WordPress site — and when you\'re ready, sync your posts directly into your newsletter editor so building campaigns takes minutes, not hours.', 'mailmojo' ); ?></p>
+			<p style="max-width: 600px; font-size: 15px; line-height: 1.6;"><?php esc_html_e( 'The easiest way to add Mailmojo subscribe forms to your WordPress site. When you\'re ready, sync your posts directly into your newsletter editor so building campaigns takes minutes, not hours.', 'mailmojo' ); ?></p>
 
 			<div class="mailmojo-features">
 				<div class="mailmojo-feature">
@@ -211,7 +211,7 @@ class Mailmojo_Admin {
 								<?php echo esc_html( $status_label ); ?>
 							</strong>
 							<?php if ( $status['message'] ) : ?>
-								<span>— <?php echo esc_html( $status['message'] ); ?></span>
+								<span>: <?php echo esc_html( $status['message'] ); ?></span>
 							<?php endif; ?>
 							<?php if ( $test_timestamp ) : ?>
 								<span>
@@ -269,7 +269,7 @@ class Mailmojo_Admin {
 			<?php if ( $show_token_features ) : ?>
 				<h2 class="mailmojo-section"><?php esc_html_e( 'Sync content to your newsletters', 'mailmojo' ); ?></h2>
 				<p class="description" style="max-width: 600px; margin-bottom: 12px;">
-					<?php esc_html_e( 'When enabled, your WordPress posts and pages become available as drag-and-drop content blocks inside the Mailmojo newsletter editor — so you can build a campaign in minutes instead of copy-pasting from your site.', 'mailmojo' ); ?>
+					<?php esc_html_e( 'When enabled, your WordPress posts and pages become available as drag-and-drop content blocks inside the Mailmojo newsletter editor, so you can build a campaign in minutes instead of copy-pasting from your site.', 'mailmojo' ); ?>
 				</p>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<?php wp_nonce_field( 'mailmojo_save_sync' ); ?>
@@ -300,7 +300,7 @@ class Mailmojo_Admin {
 											<?php echo esc_html( $app_status_text ); ?>
 										</strong>
 										<?php if ( $app_status['message'] ) : ?>
-											<span>— <?php echo esc_html( $app_status['message'] ); ?></span>
+											<span>: <?php echo esc_html( $app_status['message'] ); ?></span>
 										<?php endif; ?>
 										<?php if ( $sync_checked_at ) : ?>
 											<span>
@@ -395,7 +395,7 @@ class Mailmojo_Admin {
 			$this->sync->ensure_application_password();
 			$app_status = $this->sync->get_application_password_status();
 			if ( 'sent' !== $app_status['state'] ) {
-				// Plaintext unavailable (existing password found) — regenerate so we can push credentials to Mailmojo.
+				// Plaintext unavailable (existing password found); regenerate so we can push credentials to Mailmojo.
 				$this->sync->ensure_application_password( true );
 				$app_status = $this->sync->get_application_password_status();
 			}
