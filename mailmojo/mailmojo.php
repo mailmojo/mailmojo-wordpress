@@ -35,12 +35,6 @@ if ( class_exists( 'Mailmojo_Admin' ) ) {
 	Mailmojo_Admin::init();
 }
 
-add_action( 'init', 'mailmojo_load_textdomain' );
-
-function mailmojo_load_textdomain(): void {
-	load_plugin_textdomain( 'mailmojo', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-
 /**
  * Output the Mailmojo JS SDK snippet in the public page <head>.
  */
