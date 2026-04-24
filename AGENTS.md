@@ -44,31 +44,3 @@ Before opening a PR:
 
 When modifying any block source or assets that impact the build output,
 always run `npm run build` so `mailmojo/build/*` stays in sync.
-
-## WordPress Docker-free test harness (Codex/CI)
-
-Use the Docker-free harness when running WordPress locally in Codex or CI:
-
-### Prerequisites
-- `php` (with the `sqlite3` extension enabled)
-- `wp` (WP-CLI) available on the PATH
-- A SQLite `db.php` drop-in (default: `/opt/tools/wp-sqlite-db/db.php`, or override via `WP_SQLITE_DROPIN`)
-
-### Commands
-From the repo root:
-1. **Start WordPress:** `npm run wp:start`
-2. **Stop WordPress:** `npm run wp:stop`
-3. **Reset WordPress (wipe DB):** `npm run wp:reset`
-
-The harness provisions:
-- WordPress at `http://localhost:8888`
-- Admin credentials: **admin / password**
-- The `mailmojo` plugin is symlinked and activated by default
-- The SQLite drop-in must be available locally (no internet download)
-
-### How future E2E tests will hook in
-E2E tooling (e.g. Playwright) should:
-1. Run `npm run wp:start`
-2. Hit `http://localhost:8888/wp-admin` and log in with the seeded admin credentials
-3. Run UI flows
-4. Run `npm run wp:stop` or `npm run wp:reset` to clean up

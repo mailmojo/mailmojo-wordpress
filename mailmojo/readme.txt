@@ -110,6 +110,13 @@ Service provider: Mailmojo AS, Norway.
 Privacy policy: https://mailmojo.no/personvern
 Terms of service: https://v3.mailmojo.no/legal/terms_of_service/1.0/
 
+== Source Code ==
+
+The full source code of this plugin is available on GitHub:
+https://github.com/mailmojo/mailmojo-wordpress
+
+Bug reports and contributions are welcome.
+
 == Changelog ==
 
 = 1.0.0 =

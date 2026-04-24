@@ -1,162 +1,203 @@
 # Mailmojo WordPress Plugin
 
-This repository contains the official Mailmojo plugin for WordPress.
+This repository contains the source code for the official Mailmojo plugin for WordPress.
 
-- GitHub repository: mailmojo-wordpress (development)
-- WordPress.org plugin slug: mailmojo
-- Installed plugin folder: wp-content/plugins/mailmojo/
-- Deployable plugin source: ./mailmojo
-
-This plugin is intended to be the canonical Mailmojo integration for WordPress.
+- GitHub repository: https://github.com/mailmojo/mailmojo-wordpress
+- WordPress.org plugin slug: `mailmojo`
+- Installed plugin folder: `wp-content/plugins/mailmojo/`
+- Deployable plugin source: `./mailmojo`
 
 -------------------------------------------------------------------------------
 
 ## What this plugin does
 
-Current scope (initial versions):
-- Gutenberg blocks for embedding Mailmojo signup forms
-- Automatic loading of the Mailmojo JavaScript SDK
-  - Embedded forms
-  - Popup forms
-  - Future SDK-driven features
+- Automatic display of Mailmojo subscribe popups on public pages via a small
+  JavaScript snippet loaded from your Mailmojo account.
+- A **Mailmojo Popup Button** Gutenberg block that opens a specific published
+  popup form when clicked.
+- Optional **content sync** that pushes published WordPress posts to Mailmojo
+  so they can be dropped into newsletters from Mailmojo's content browser.
 
-Planned / upcoming:
-- Content synchronization from WordPress to Mailmojo
-  - Posts (initially)
-  - Products (WooCommerce, later)
+See [mailmojo/readme.txt](mailmojo/readme.txt) for the user-facing description.
 
 -------------------------------------------------------------------------------
 
-## Requirements
+## Build requirements
 
-For development:
 - Node.js (LTS)
-- Docker
-- PHP
+- npm
+- PHP 8.2 or newer
 - Composer
+- Docker (only required for local WordPress via `@wordpress/env`)
 
-End users do not need Node, Docker, or Composer.
+End users do not need any of these — they install the plugin from the
+WordPress.org directory or the packaged zip.
 
 -------------------------------------------------------------------------------
 
-## Local development
+## Building the plugin
 
-This project uses @wordpress/env to run WordPress locally via Docker.
+All build commands run from inside the `mailmojo/` directory.
 
-Start WordPress (from the repository root):
-
-    npx @wordpress/env start
-
-WordPress will be available at:
-- Site: http://localhost:8888
-- Admin: http://localhost:8888/wp-admin
-- Username: admin
-- Password: password
-
-Install plugin dependencies:
+Install dependencies:
 
     cd mailmojo
     npm install
     composer install
 
-Build the plugin:
+Build JavaScript/CSS assets:
 
     npm run build
 
-Or, during active development:
+This uses `@wordpress/scripts` and outputs compiled assets to `mailmojo/build/`,
+including a generated `build/blocks-manifest.php`.
+
+During active development you can use the watch mode:
 
     npm run start
 
-Activate the plugin via:
-- WP Admin → Plugins → Mailmojo
+### Producing a distributable zip
+
+From the repository root:
+
+    npm run plugin:package
+
+This runs [bin/package-plugin.sh](bin/package-plugin.sh), which:
+
+1. Runs `composer install --no-dev --optimize-autoloader` inside `mailmojo/`.
+2. Runs `npm run build` inside `mailmojo/`.
+3. Copies the plugin source to `release/mailmojo/`, excluding development
+   files (`src/`, `node_modules/`, `composer.lock`, `package.json`,
+   `phpcs.xml`, dotfiles, Markdown, shell scripts, tests).
+4. Produces `dist/mailmojo-<version>.zip`.
+
+The resulting zip matches what is deployed to WordPress.org.
+
+-------------------------------------------------------------------------------
+
+## Local development with WordPress
+
+The repository is set up to run WordPress locally via
+[`@wordpress/env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/),
+which uses Docker.
+
+From the repository root:
+
+    npx @wordpress/env start
+
+WordPress will be available at http://localhost:8888 (admin:
+`admin` / `password`).
+
+Note: [.wp-env.json](.wp-env.json) sets `WP_HOME` and `MAILMOJO_API_BASE_URL`
+to values used by the Mailmojo team's internal development setup
+(`wp.dev.local`, `api.mailmojo.local`). For a clean external build check the
+site loads at `localhost:8888` via the admin, but full popup/API flows
+require overriding those or connecting to the real Mailmojo API.
+
+To stop:
+
+    npx @wordpress/env stop
 
 -------------------------------------------------------------------------------
 
 ## Project structure
 
     mailmojo-wordpress/
-    ├── AGENTS.md              (Dev / agent guidelines; not deployed)
+    ├── README.md                 (This file; dev-facing)
     ├── CONTRIBUTING.md
-    ├── README.md              (This file; dev-facing)
     ├── SECURITY.md
-    ├── .github/
-    ├── .wp-env.json
-    └── mailmojo/              (The WordPress plugin; deployable)
-        ├── mailmojo.php
-        ├── readme.txt         (WordPress.org readme)
-        ├── block.json
-        ├── src/
-        ├── build/
-        ├── vendor/
-        └── composer.json
+    ├── AGENTS.md                 (Guidelines for coding agents)
+    ├── LICENSE
+    ├── .wp-env.json              (Local WordPress config for @wordpress/env)
+    ├── .github/workflows/        (CI, including WordPress.org deploy)
+    ├── bin/                      (Packaging and i18n scripts)
+    ├── wp-assets/                (Banner/icon/screenshots for WordPress.org)
+    └── mailmojo/                 (The plugin — deployable source)
+        ├── mailmojo.php          (Plugin entry)
+        ├── uninstall.php
+        ├── readme.txt            (WordPress.org readme)
+        ├── composer.json
+        ├── package.json
+        ├── phpcs.xml
+        ├── includes/             (PHP classes: API, admin, sync)
+        ├── src/mailmojo/         (Block source: block.json, JS, SCSS)
+        ├── build/                (Built assets, generated)
+        ├── assets/
+        ├── languages/
+        └── vendor/               (Composer dependencies, generated)
 
-Only the contents of ./mailmojo are shipped to WordPress.org and end users.
+Only the contents of `./mailmojo` are shipped to WordPress.org and end users.
 
 -------------------------------------------------------------------------------
 
-## Build and distribution
+## Linting and translations
 
-- JavaScript assets are built using @wordpress/scripts
-- Source files live in mailmojo/src
-- Compiled assets are output to mailmojo/build
-- PHP dependencies are installed via Composer into mailmojo/vendor
+- PHPCS is configured via [mailmojo/phpcs.xml](mailmojo/phpcs.xml) using the
+  WordPress Coding Standards. After `composer install`, run from `mailmojo/`:
 
-Releases are deployed to WordPress.org via CI-only Subversion.
+        ./vendor/bin/phpcs
 
-Developers do not use Subversion locally.
+- JavaScript and CSS linting via `@wordpress/scripts`:
+
+        npm run lint:js
+        npm run lint:css
+
+- Translation files can be regenerated via:
+
+        npm run plugin:i18n
 
 -------------------------------------------------------------------------------
 
 ## WordPress.org release automation
 
-This repo includes a GitHub Actions workflow:
-- `.github/workflows/deploy-wordpress-org.yml`
+Releases are deployed to WordPress.org via GitHub Actions using
+[`10up/action-wordpress-plugin-deploy`](https://github.com/10up/action-wordpress-plugin-deploy).
+Developers do not use Subversion locally.
 
-It deploys to WordPress.org using the well-tested:
-- `10up/action-wordpress-plugin-deploy`
+Workflow: [.github/workflows/deploy-wordpress-org.yml](.github/workflows/deploy-wordpress-org.yml)
 
 ### One-time setup (GitHub repository settings)
 
 Add these repository secrets:
-- `WP_ORG_SVN_USERNAME` (WordPress.org username with commit access to plugin slug)
-- `WP_ORG_SVN_PASSWORD` (WordPress.org application password)
+
+- `WP_ORG_SVN_USERNAME` — WordPress.org username with commit access to the plugin slug
+- `WP_ORG_SVN_PASSWORD` — WordPress.org application password
 
 ### Release process
 
-1. Update version in:
-- `mailmojo/mailmojo.php` (`Version:` header)
-- `mailmojo/readme.txt` (`Stable tag:`)
-2. Commit changes to `main`.
-3. Create and push a semantic tag with `v` prefix, for example:
-- `git tag v0.1.1`
-- `git push origin v0.1.1`
+1. Update the version in:
+   - [mailmojo/mailmojo.php](mailmojo/mailmojo.php) (`Version:` header)
+   - [mailmojo/readme.txt](mailmojo/readme.txt) (`Stable tag:`)
+2. Add a matching entry to the `== Changelog ==` section of
+   [mailmojo/readme.txt](mailmojo/readme.txt).
+3. Commit changes to `main`.
+4. Create and push a semantic tag with a `v` prefix:
 
-The workflow validates that tag, plugin version, and stable tag all match before deploying.
+        git tag v1.0.1
+        git push origin v1.0.1
+
+The workflow validates that the tag, plugin version, and stable tag all match
+before deploying.
 
 -------------------------------------------------------------------------------
 
 ## Security
 
-Please report security issues privately.
-
-Do not open public issues or pull requests for vulnerabilities.
-
-See SECURITY.md for responsible disclosure instructions.
+Please report security issues privately. Do not open public issues or pull
+requests for vulnerabilities. See [SECURITY.md](SECURITY.md) for responsible
+disclosure instructions.
 
 -------------------------------------------------------------------------------
 
 ## Contributing
 
-Contributions are welcome.
-
-Please read:
-- CONTRIBUTING.md for workflow and expectations
-- AGENTS.md for guidelines for both human contributors and coding agents
-
-Keep pull requests focused, well-described, and reviewable.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for
+workflow and expectations. Keep pull requests focused, well-described, and
+reviewable.
 
 -------------------------------------------------------------------------------
 
 ## License
 
 This project is licensed under the GNU General Public License v2.0 or later.
+See [LICENSE](LICENSE).
