@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: mailmojo/package-lock.json
 
@@ -119,7 +119,7 @@ jobs:
           if-no-files-found: error
 
       - name: Deploy to WordPress.org
-        uses: 10up/action-wordpress-plugin-deploy@stable
+        uses: 10up/action-wordpress-plugin-deploy@2.3.0
         env:
           SLUG: mailmojo
           BUILD_DIR: release/mailmojo
