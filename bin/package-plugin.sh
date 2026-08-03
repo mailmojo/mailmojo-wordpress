@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "${REPO_ROOT}"
+
 VERSION="$(sed -n 's/^[[:space:]]*\* Version:[[:space:]]*//p' mailmojo/mailmojo.php | head -n 1 | xargs)"
 ZIP_NAME="dist/mailmojo-${VERSION}.zip"
 
@@ -12,26 +15,11 @@ npm run build --prefix mailmojo
 mkdir -p dist
 rm -f "${ZIP_NAME}"
 rm -rf release
-mkdir -p release/mailmojo
 
-rsync -a \
-  --exclude '.*' \
-  --exclude 'node_modules/' \
-  --exclude '/src/' \
-  --exclude 'composer.lock' \
-  --exclude 'package.json' \
-  --exclude 'package-lock.json' \
-  --exclude 'phpcs.xml' \
-  --exclude 'test/' \
-  --exclude 'tests/' \
-  --exclude 'Test/' \
-  --exclude 'Tests/' \
-  --exclude 'docs/' \
-  --exclude '*.md' \
-  --exclude '*.sh' \
-  --exclude 'Dockerfile' \
-  --exclude '*.dist' \
-  mailmojo/ release/mailmojo/
+# Staging and verification are shared with the WordPress.org deploy workflow so
+# the zip built here matches what actually gets released.
+bin/stage-release.sh release/mailmojo
+bin/verify-release.sh release/mailmojo
 
 (cd release && zip -qr "$(pwd)/../${ZIP_NAME}" mailmojo)
 

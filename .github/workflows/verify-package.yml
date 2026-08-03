@@ -1,0 +1,78 @@
+name: Verify Release Package
+
+# Dry run of the release packaging on every change, so a packaging regression is
+# caught here instead of at tag time. Uses the same bin/stage-release.sh and
+# bin/verify-release.sh as .github/workflows/deploy-wordpress-org.yml.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mailmojo/package-lock.json
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+
+      - name: Install Node dependencies
+        run: npm ci --prefix mailmojo
+
+      - name: Build plugin assets
+        run: npm run build --prefix mailmojo
+
+      - name: Install Composer dependencies
+        run: composer install --working-dir=mailmojo --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: Stage release package
+        run: bin/stage-release.sh release/mailmojo
+
+      - name: Verify staged package
+        run: bin/verify-release.sh release/mailmojo
+
+      - name: Create release zip
+        run: |
+          set -euo pipefail
+
+          (cd release && zip -qr ../mailmojo-package-check.zip mailmojo)
+
+      - name: Verify release zip
+        run: |
+          set -euo pipefail
+
+          rm -rf zip-check
+          mkdir -p zip-check
+          unzip -q mailmojo-package-check.zip -d zip-check
+          bin/verify-release.sh zip-check/mailmojo
+
+      - name: Upload package for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailmojo-package-check
+          path: mailmojo-package-check.zip
+          if-no-files-found: error
+          retention-days: 7

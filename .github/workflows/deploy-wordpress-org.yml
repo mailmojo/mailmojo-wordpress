@@ -74,33 +74,10 @@ jobs:
           echo "ZIP_NAME=${ZIP_NAME}" >> "$GITHUB_ENV"
 
           rm -rf release
-          mkdir -p release/mailmojo
+          bin/stage-release.sh release/mailmojo
 
-          rsync -a \
-            --exclude '.*' \
-            --exclude 'node_modules/' \
-            --exclude 'src/' \
-            --exclude 'composer.lock' \
-            --exclude 'package.json' \
-            --exclude 'package-lock.json' \
-            --exclude 'phpcs.xml' \
-            --exclude 'test/' \
-            --exclude 'tests/' \
-            --exclude 'Test/' \
-            --exclude 'Tests/' \
-            --exclude 'docs/' \
-            --exclude '*.md' \
-            --exclude '*.sh' \
-            --exclude 'Dockerfile' \
-            --exclude '*.dist' \
-            mailmojo/ release/mailmojo/
-
-          test -f release/mailmojo/mailmojo.php
-          test -d release/mailmojo/build
-          test -d release/mailmojo/includes
-          test -d release/mailmojo/assets
-          test -d release/mailmojo/vendor
-          test -f release/mailmojo/readme.txt
+      - name: Verify staged package
+        run: bin/verify-release.sh release/mailmojo
 
       - name: Create release zip
         run: |
@@ -109,7 +86,15 @@ jobs:
           ZIP_NAME="mailmojo-${GITHUB_REF_NAME#v}.zip"
           (cd release && zip -qr "../${ZIP_NAME}" mailmojo)
 
-          unzip -l "${ZIP_NAME}" | grep -E 'mailmojo/(mailmojo\.php|readme\.txt|build/|includes/|assets/|vendor/)' >/dev/null
+      - name: Verify release zip
+        run: |
+          set -euo pipefail
+
+          rm -rf zip-check
+          mkdir -p zip-check
+          unzip -q "${ZIP_NAME}" -d zip-check
+          bin/verify-release.sh zip-check/mailmojo
+          rm -rf zip-check
 
       - name: Upload release zip
         uses: actions/upload-artifact@v4
