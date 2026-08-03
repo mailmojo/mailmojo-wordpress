@@ -76,15 +76,26 @@ jobs:
           rm -rf release
           bin/stage-release.sh release/mailmojo
 
-      - name: Verify staged package
-        run: bin/verify-release.sh release/mailmojo
-
+      # Zip and upload before verifying, so a failed release still leaves an
+      # artifact to download and inspect. The deploy step below only runs when
+      # every preceding step succeeded, so verification still gates the release.
       - name: Create release zip
         run: |
           set -euo pipefail
 
           ZIP_NAME="mailmojo-${GITHUB_REF_NAME#v}.zip"
           (cd release && zip -qr "../${ZIP_NAME}" mailmojo)
+
+      - name: Upload release zip
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailmojo-${{ github.ref_name }}
+          path: ${{ env.ZIP_NAME }}
+          if-no-files-found: warn
+
+      - name: Verify staged package
+        run: bin/verify-release.sh release/mailmojo
 
       - name: Verify release zip
         run: |
@@ -95,13 +106,6 @@ jobs:
           unzip -q "${ZIP_NAME}" -d zip-check
           bin/verify-release.sh zip-check/mailmojo
           rm -rf zip-check
-
-      - name: Upload release zip
-        uses: actions/upload-artifact@v4
-        with:
-          name: mailmojo-${{ github.ref_name }}
-          path: ${{ env.ZIP_NAME }}
-          if-no-files-found: error
 
       - name: Deploy to WordPress.org
         uses: 10up/action-wordpress-plugin-deploy@2.3.0

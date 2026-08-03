@@ -51,14 +51,25 @@ jobs:
       - name: Stage release package
         run: bin/stage-release.sh release/mailmojo
 
-      - name: Verify staged package
-        run: bin/verify-release.sh release/mailmojo
-
+      # Zip before verifying, so a failing verification still leaves an artifact
+      # to download and inspect.
       - name: Create release zip
         run: |
           set -euo pipefail
 
           (cd release && zip -qr ../mailmojo-package-check.zip mailmojo)
+
+      - name: Upload package for inspection
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailmojo-package-check
+          path: mailmojo-package-check.zip
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Verify staged package
+        run: bin/verify-release.sh release/mailmojo
 
       - name: Verify release zip
         run: |
@@ -68,11 +79,3 @@ jobs:
           mkdir -p zip-check
           unzip -q mailmojo-package-check.zip -d zip-check
           bin/verify-release.sh zip-check/mailmojo
-
-      - name: Upload package for inspection
-        uses: actions/upload-artifact@v4
-        with:
-          name: mailmojo-package-check
-          path: mailmojo-package-check.zip
-          if-no-files-found: error
-          retention-days: 7
