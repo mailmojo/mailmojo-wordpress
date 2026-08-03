@@ -14,7 +14,8 @@
         "squizlabs/php_codesniffer": "*",
         "wp-coding-standards/wpcs": "*",
         "dealerdirect/phpcodesniffer-composer-installer": "*",
-        "wp-cli/wp-cli-bundle": "^2.12"
+        "wp-cli/wp-cli-bundle": "^2.12",
+        "phpcompatibility/phpcompatibility-wp": "*"
     },
     "config": {
         "allow-plugins": {
