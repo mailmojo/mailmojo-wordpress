@@ -4,7 +4,7 @@ Tags:              newsletter, email marketing, forms, popup, content-sync
 Requires at least: 5.8
 Requires PHP:      8.2
 Tested up to:      6.9
-Stable tag:        1.0.0
+Stable tag:        1.1.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,6 +118,10 @@ https://github.com/mailmojo/mailmojo-wordpress
 Bug reports and contributions are welcome.
 
 == Changelog ==
+
+= 1.1.0 =
+* IMPORTANT: Fixes proper release with all required dependencies.
+* No other functional changes.
 
 = 1.0.0 =
 * Initial public release.

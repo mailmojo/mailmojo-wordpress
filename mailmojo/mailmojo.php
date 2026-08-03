@@ -3,7 +3,7 @@
  * Plugin Name:       Mailmojo
  * Plugin URI:        https://github.com/mailmojo/mailmojo-wordpress
  * Description:       Display Mailmojo subscribe popups on your site, add popup button blocks, and sync your WordPress posts to Mailmojo for faster newsletter creation.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 5.8
  * Requires PHP:      8.2
  * Author:            Mailmojo
